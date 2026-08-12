@@ -1,0 +1,35 @@
+# PRD — LATTICE Smart Energy Monitor
+
+Master guide & build plan. Everything in `docs/` links back to here.
+
+## 1. The Idea
+An affordable smart energy monitor for Indian homes under the **LATTICE** brand. It connects to Home Assistant to import rooms, devices, and live energy sensors. It uses an AI model (SLM) to identify unknown devices from usage patterns and verify specifications online. It displays room-by-room and appliance-by-appliance electricity usage in real time (in ₹ and kWh) so homeowners can eliminate energy waste without guesswork.
+
+## 2. Who It Is For
+Middle-class Indian homeowners (e.g. in Bengaluru) who pay ₹3,000–₹10,000+ monthly electricity bills, own 2–4 ACs/coolers, and want to lower costs by identifying which room or appliance is the true energy hog.
+
+## 3. The Main Action
+A Home Assistant-style live dashboard featuring a real-time electricity flow map (meter → rooms → appliances) with live ₹ cost tracking, ranked energy hogs, and device controls.
+
+## 4. Screens Planned
+1. **Live Dashboard (Home):** Real-time power flow diagram, total monthly ₹ bill predictor, room status cards, top 3 energy hog appliances, and current power draw.
+2. **Home Assistant Connect & Import:** One-click integration screen to import rooms, devices, and smart meter sensors automatically.
+3. **AI Appliance Identification & Verification:** Screen showing AI-identified appliances (from usage patterns), online spec verification (star ratings, wattage), user confirmation/correction, and manual addition fallback.
+4. **Room & Appliance Detail:** Detailed view for any room or device showing operating hours, live wattage, monthly ₹ cost, and historical trends.
+5. **Insights & Consent Settings:** Anonymized data-sharing toggle (for Pro features / insights) and privacy controls.
+
+## 5. Saved Information (Database)
+YES — uses **Supabase** (free, no credit card required) for user accounts, homes, rooms, appliances, AI identification logs, live readings, and privacy consent.
+👉 Full database guide: [database-plan.md](database-plan.md)
+
+## 6. Look and Feel (Style)
+- **Brand:** LATTICE (*"Connecting Ideas. Building Solutions."*)
+- **Style:** Liquid Glass OS aesthetic (frosted glass cards, backdrop blur, translucent layers, glass borders).
+- **Mood:** Precise, Effortless, Professional, Smooth, Calm — clean and purposeful with zero fluff or meaningless graphs.
+- **Palette:** Deep Slate Navy (`#0B0F19`) backdrop, LATTICE Magenta Accent (`#E11D48`) for standard/free accounts, and **Electric Blue (`#0EA5E9`) exclusively unlocked for PRO accounts**.
+👉 Full design guide: [design-guidelines.md](design-guidelines.md)
+
+## 7. Build Strategy
+- **Web App:** Works on all browsers, desktops, tablets, and phones.
+- **Tech Stack:** React / Next.js / Vite + Tailwind CSS + DaisyUI + Lucide Icons + Supabase + Simulated Home Assistant API / SLM AI engine.
+- **Publishing:** Vercel (free live URL via `npx vercel`).
