@@ -1,59 +1,48 @@
-import { useNavigate } from 'react-router-dom';
-import { Plug, Cpu, IndianRupee, ArrowRight } from 'lucide-react';
+import { ArrowRight, IndianRupee } from 'lucide-react';
 
 export default function Welcome({ onStart }) {
-  const navigate = useNavigate();
-
-  const start = () => {
-    onStart();
-    navigate('/');
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="fixed inset-0 bg-lattice-grid pointer-events-none" />
-      <div
-        className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(225,29,72,0.14) 0%, transparent 70%)' }}
-      />
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: 'var(--bg)' }}>
+      <div className="w-full max-w-sm text-center">
+        <img
+          src="/brand/logo.png"
+          alt="LATTICE logo"
+          className="w-20 h-20 rounded-3xl object-cover mx-auto mb-6"
+          draggable="false"
+        />
+        <h1 className="text-[34px] font-extrabold tracking-tight leading-none">LATTICE</h1>
+        <p className="text-[11px] text-faint uppercase tracking-[0.25em] mt-2 mb-10">
+          Connecting Ideas. Building Solutions.
+        </p>
 
-      <div className="relative z-10 w-full max-w-md text-center">
-        <div className="glass-panel rounded-3xl p-8">
-          <div className="w-16 h-16 mx-auto rounded-2xl glow-magenta bg-rose-500 flex items-center justify-center mb-5">
-            <img src="/lattice-mark.svg" alt="LATTICE" className="w-9 h-9" draggable="false" />
+        <div className="card p-6 text-left mb-5">
+          <p className="text-[15px] font-semibold mb-1">Your home's electricity, understood.</p>
+          <p className="text-[13px] text-muted leading-relaxed">
+            Every room, every appliance, every rupee — live on your screen.
+          </p>
+          <div className="flex items-center gap-2.5 mt-5 pt-5 border-t" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex -space-x-2">
+              {[1, 2, 3].map(i => (
+                <img
+                  key={i}
+                  src={`/brand/${i === 1 ? 'logo' : i === 2 ? 'brand-dark' : 'brand-alt'}.png`}
+                  alt=""
+                  className="w-7 h-7 rounded-full object-cover border-2"
+                  style={{ borderColor: 'var(--surface)' }}
+                  draggable="false"
+                />
+              ))}
+            </div>
+            <p className="text-[11px] text-muted">Imports your Home Assistant devices & smart-meter data</p>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">LATTICE</h1>
-          <p className="text-[11px] text-slate-400 uppercase tracking-[0.25em] mt-1 mb-6">
-            Connecting Ideas. Building Solutions.
-          </p>
-          <p className="text-sm text-slate-300 mb-7 leading-relaxed">
-            Your home's electricity, understood.<br />
-            Every room, every appliance, every rupee.
-          </p>
-
-          <div className="flex flex-col gap-2 mb-7">
-            {[
-              { icon: Plug, label: 'Connects to your Home Assistant' },
-              { icon: Cpu, label: 'AI identifies unknown appliances' },
-              { icon: IndianRupee, label: 'Live ₹ cost per device' },
-            ].map(f => (
-              <div key={f.label} className="flex items-center justify-center gap-2 text-[13px] text-slate-300">
-                <f.icon className="w-4 h-4 text-rose-400" />
-                {f.label}
-              </div>
-            ))}
-          </div>
-
-          <button
-            onClick={start}
-            className="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-2xl py-3.5 flex items-center justify-center gap-2 transition-all glow-magenta"
-          >
-            Continue as demo user <ArrowRight className="w-4 h-4" />
-          </button>
-          <p className="text-[11px] text-slate-500 mt-4">
-            Demo mode — no account needed. Full logins come with the final build.
-          </p>
         </div>
+
+        <button onClick={onStart} className="btn btn-primary w-full !py-3.5 text-[15px]">
+          Continue as demo user <ArrowRight className="w-4 h-4" />
+        </button>
+        <p className="text-[11px] text-faint mt-4 flex items-center justify-center gap-1.5">
+          <IndianRupee className="w-3.5 h-3.5" /> Demo mode — no account needed
+        </p>
       </div>
     </div>
   );

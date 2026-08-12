@@ -1,19 +1,22 @@
 import { useParams, Link, useOutletContext } from 'react-router-dom';
 import { BadgeCheck, Cpu, Pencil, Clock, IndianRupee, Zap, ArrowLeft } from 'lucide-react';
-import { useEnergySim } from '../hooks/useEnergySim.js';
+import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile } from '../data/mockData.js';
+import { useState } from 'react';
 
 export default function DeviceDetail() {
   const { id } = useParams();
-  const { pro, activeColor, glowClass } = useOutletContext();
-  const sim = useEnergySim(mockHome.devices);
-  const device = sim.devices.find(d => d.id === id);
+  const { pro, activeColor } = useOutletContext();
+  const { devices, toggleDevice } = useEnergy();
+  const device = devices.find(d => d.id === id);
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState('');
 
   if (!device) {
     return (
       <div className="text-center py-16">
-        <p className="text-slate-400 mb-4">Device not found.</p>
-        <Link to="/devices" className={`font-semibold ${activeColor}`}>← Back to devices</Link>
+        <p className="text-muted mb-4">Device not found.</p>
+        <Link to="/devices" className="font-semibold" style={{ color: 'var(--accent)' }}>← Back to devices</Link>
       </div>
     );
   }
@@ -21,62 +24,88 @@ export default function DeviceDetail() {
   const hours = dailyProfile(device, device.id.charCodeAt(1) % 40);
   const maxW = Math.max(...hours.map(h => h.watts), 1);
   const todayUsed = hours.reduce((s, h) => s + h.watts, 0);
+  const on = device.status === 'on';
+
+  const save = () => {
+    setEditing(false);
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Link to="/devices" className="flex items-center gap-1.5 text-[12px] text-slate-400 hover:text-white mb-4 transition-colors">
+      <Link to="/devices" className="flex items-center gap-1.5 text-[12px] font-semibold mb-4" style={{ color: 'var(--accent)' }}>
         <ArrowLeft className="w-3.5 h-3.5" /> Back to devices
       </Link>
 
-      <div className="glass-panel rounded-3xl p-6 mb-5">
-        <div className="flex items-start gap-4">
-          <div className={`w-12 h-12 rounded-2xl ${activeColor} ${glowClass} bg-white/5 flex items-center justify-center shrink-0`}>
-            <Zap className="w-6 h-6" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-extrabold tracking-tight">{device.name}</h1>
-            <p className="text-sm text-slate-400 mb-2">{device.room}</p>
-            <div className="flex flex-wrap gap-2">
-              {device.verified ? (
-                <span className="flex items-center gap-1 text-[11px] font-bold bg-emerald-500/15 text-emerald-300 px-2 py-1 rounded-lg">
-                  <BadgeCheck className="w-3.5 h-3.5" /> AI verified spec
-                </span>
-              ) : device.identified ? (
-                <span className="flex items-center gap-1 text-[11px] font-bold bg-amber-500/15 text-amber-300 px-2 py-1 rounded-lg">
-                  AI guess — confirm on Devices page
-                </span>
+      <div className="card p-5 sm:p-6 mb-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: on ? 'var(--accent-soft)' : 'var(--surface-2)' }}>
+              <Zap className="w-5 h-5" style={{ color: on ? 'var(--accent)' : 'var(--text-faint)' }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              {editing ? (
+                <input
+                  autoFocus
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && save()}
+                  className="input !py-1.5 w-full"
+                />
               ) : (
-                <span className="flex items-center gap-1 text-[11px] font-bold bg-rose-500/15 text-rose-300 px-2 py-1 rounded-lg">
-                  <Cpu className="w-3.5 h-3.5" /> Unidentified — run AI scan
-                </span>
+                <h1 className="text-lg font-extrabold tracking-tight truncate">{device.name}</h1>
               )}
-              <button className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white glass-button px-2 py-1 rounded-lg">
-                <Pencil className="w-3 h-3" /> Edit details
-              </button>
+              <p className="text-[12px] text-faint">{device.room}</p>
             </div>
           </div>
+          <button
+            onClick={() => toggleDevice(device.id)}
+            className={`switch ${on ? 'on' : ''}`}
+            title={on ? 'Turn off' : 'Turn on'}
+          />
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mt-6">
-          <div className="glass-button rounded-2xl p-3 text-center">
-            <p className={`text-lg font-bold ${activeColor}`}>{device.currentWatts} <span className="text-[10px] text-slate-500">W</span></p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Live now</p>
+        <div className="flex flex-wrap gap-2 mb-5">
+          {device.verified ? (
+            <span className="chip" style={{ background: 'var(--green-soft)', color: 'var(--green)' }}>
+              <BadgeCheck className="w-3 h-3" /> AI verified spec
+            </span>
+          ) : device.identified ? (
+            <span className="chip" style={{ background: 'var(--amber-soft)', color: 'var(--amber)' }}>
+              AI guess — confirm on Devices page
+            </span>
+          ) : (
+            <span className="chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+              <Cpu className="w-3 h-3" /> Unidentified — run AI scan
+            </span>
+          )}
+          <button
+            onClick={() => { setEditing(true); setName(device.name); }}
+            className="btn btn-ghost !px-2.5 !py-1 !text-[11px]"
+          >
+            <Pencil className="w-3 h-3" /> Edit
+          </button>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center py-3 rounded-xl" style={{ background: 'var(--surface-2)' }}>
+            <p className="text-lg font-bold leading-none">{device.currentWatts}<span className="text-[10px] text-muted"> W</span></p>
+            <p className="label mt-1.5">Live now</p>
           </div>
-          <div className="glass-button rounded-2xl p-3 text-center">
-            <p className="text-lg font-bold text-white">{Math.round(todayUsed / 100) / 10} <span className="text-[10px] text-slate-500">kWh</span></p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Today</p>
+          <div className="text-center py-3 rounded-xl" style={{ background: 'var(--surface-2)' }}>
+            <p className="text-lg font-bold leading-none">{Math.round(todayUsed / 100) / 10}<span className="text-[10px] text-muted"> kWh</span></p>
+            <p className="label mt-1.5">Today</p>
           </div>
-          <div className="glass-button rounded-2xl p-3 text-center">
-            <p className={`text-lg font-bold ${activeColor}`}>₹{device.monthCost.toLocaleString('en-IN')}</p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">This month</p>
+          <div className="text-center py-3 rounded-xl" style={{ background: 'var(--surface-2)' }}>
+            <p className="text-lg font-bold leading-none">₹{device.monthCost.toLocaleString('en-IN')}</p>
+            <p className="label mt-1.5">This month</p>
           </div>
         </div>
       </div>
 
-      <div className="glass-panel rounded-3xl p-6 mb-5">
+      <div className="card p-5 mb-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-widest">Today's usage curve</h2>
-          <span className={`flex items-center gap-1.5 text-xs font-semibold ${activeColor}`}>
+          <p className="label">Today's usage curve</p>
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
             <Clock className="w-3.5 h-3.5" /> 24h
           </span>
         </div>
@@ -84,38 +113,28 @@ export default function DeviceDetail() {
           {hours.map(h => (
             <div
               key={h.hour}
-              className={`flex-1 rounded-t ${h.watts > 0 ? (pro ? 'bg-sky-400/70' : 'bg-rose-400/70') : 'bg-white/5'}`}
-              style={{ height: `${Math.max(4, (h.watts / maxW) * 100)}%`, transition: 'all 0.2s' }}
+              className={`bar flex-1 ${h.watts > 0 ? '' : 'off'}`}
+              style={{ height: `${Math.max(5, (h.watts / maxW) * 100)}%` }}
               title={`${h.hour}:00 — ${h.watts} W`}
             />
           ))}
         </div>
-        <div className="flex justify-between text-[10px] text-slate-500 mt-2">
-          <span>00:00</span>
-          <span>06:00</span>
-          <span>12:00</span>
-          <span>18:00</span>
-          <span>23:00</span>
+        <div className="flex justify-between text-[9px] text-faint mt-2 font-mono">
+          <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
         </div>
       </div>
 
-      <div className="glass-panel rounded-3xl p-5 mb-5">
-        <div className="flex items-center gap-3 mb-3">
-          <IndianRupee className={`w-5 h-5 ${activeColor}`} />
-          <h2 className="text-sm font-semibold text-slate-300">Cost math</h2>
+      <div className="card p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <IndianRupee className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+          <p className="font-bold text-[14px]">Cost math</p>
         </div>
-        <div className="text-[13px] space-y-2 text-slate-400">
-          <p className="flex justify-between">
-            <span>Usage today</span>
-            <span className="font-mono text-white">{Math.round(todayUsed / 100) / 10} kWh</span>
-          </p>
-          <p className="flex justify-between">
-            <span>Tariff</span>
-            <span className="font-mono text-white">₹{mockHome.tariff} / unit</span>
-          </p>
-          <p className="flex justify-between border-t border-white/5 pt-2">
-            <span className="text-white font-semibold">Estimated cost today</span>
-            <span className={`font-mono font-bold ${activeColor}`}>≈ ₹{Math.round((todayUsed / 100) * mockHome.tariff)}</span>
+        <div className="text-[13px] space-y-2">
+          <p className="flex justify-between"><span className="text-muted">Usage today</span><span className="font-mono">{Math.round(todayUsed / 100) / 10} kWh</span></p>
+          <p className="flex justify-between"><span className="text-muted">Tariff</span><span className="font-mono">₹{mockHome.tariff} / unit</span></p>
+          <p className="flex justify-between pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+            <span className="font-bold">Estimated cost today</span>
+            <span className="font-mono font-bold" style={{ color: 'var(--accent)' }}>≈ ₹{Math.round((todayUsed / 100) * mockHome.tariff)}</span>
           </p>
         </div>
       </div>

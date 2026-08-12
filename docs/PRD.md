@@ -9,24 +9,25 @@ An affordable smart energy monitor for Indian homes under the **LATTICE** brand.
 Middle-class Indian homeowners (e.g. in Bengaluru) who pay ₹3,000–₹10,000+ monthly electricity bills, own 2–4 ACs/coolers, and want to lower costs by identifying which room or appliance is the true energy hog.
 
 ## 3. The Main Action
-A Home Assistant-style live dashboard featuring a real-time electricity flow map (meter → rooms → appliances) with live ₹ cost tracking, ranked energy hogs, and device controls.
+A Home Assistant-style live dashboard: a big "₹ today" number, a live device list with **on/off switches**, a 24-hour usage curve, room totals, and the month's top energy hogs.
 
 ## 4. Screens Planned
-1. **Live Dashboard (Home):** Real-time power flow diagram, total monthly ₹ bill predictor, room status cards, top 3 energy hog appliances, and current power draw.
+1. **Live Dashboard (Home):** "₹ today" hero + live watts, 24-hour usage curve, device list with on/off toggles, room totals, top energy hogs.
 2. **Home Assistant Connect & Import:** One-click integration screen to import rooms, devices, and smart meter sensors automatically.
 3. **AI Appliance Identification & Verification:** Screen showing AI-identified appliances (from usage patterns), online spec verification (star ratings, wattage), user confirmation/correction, and manual addition fallback.
-4. **Room & Appliance Detail:** Detailed view for any room or device showing operating hours, live wattage, monthly ₹ cost, and historical trends.
-5. **Insights & Consent Settings:** Anonymized data-sharing toggle (for Pro features / insights) and privacy controls.
+4. **Room & Appliance Detail:** Detailed view for any room or device showing operating hours, live wattage, monthly ₹ cost, historical trends, and an on/off toggle.
+5. **Insights & Consent Settings:** Anonymized data-sharing toggle (for Pro features / insights), tariff setting, and privacy controls.
 
 ## 5. Saved Information (Database)
 YES — uses **Supabase** (free, no credit card required) for user accounts, homes, rooms, appliances, AI identification logs, live readings, and privacy consent.
 👉 Full database guide: [database-plan.md](database-plan.md)
 
 ## 6. Look and Feel (Style)
-- **Brand:** LATTICE (*"Connecting Ideas. Building Solutions."*)
-- **Style:** Liquid Glass OS aesthetic (frosted glass cards, backdrop blur, translucent layers, glass borders).
-- **Mood:** Precise, Effortless, Professional, Smooth, Calm — clean and purposeful with zero fluff or meaningless graphs.
-- **Palette:** Deep Slate Navy (`#0B0F19`) backdrop, LATTICE Magenta Accent (`#E11D48`) for standard/free accounts, and **Electric Blue (`#0EA5E9`) exclusively unlocked for PRO accounts**.
+- **Brand:** LATTICE (*"Connecting Ideas. Building Solutions."*) — official logo in the top bar and welcome screen.
+- **Style:** Minimalist, Raycast-inspired. Calm surfaces, quiet borders, compact type, one strong accent.
+- **Mood:** Precise, Effortless, Professional, Smooth, Calm — zero fluff or meaningless graphs.
+- **Themes:** Dark (default) and Light, switchable in the top bar.
+- **Palette:** near-black `#141416` / off-white `#FAFAFB` backgrounds, LATTICE magenta accent, **Electric Blue exclusively for PRO accounts**.
 👉 Full design guide: [design-guidelines.md](design-guidelines.md)
 
 ## 7. Build Strategy

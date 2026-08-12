@@ -5,26 +5,41 @@ Plain-English guide to the look, feel, colors, fonts, and visual style of the LA
 ## Brand Identity
 - **Name:** LATTICE
 - **Tagline:** Connecting Ideas. Building Solutions.
-- **Personality:** Precise, Effortless, Professional, Smooth, Calm (Clean & Purposeful — no useless decorative charts or gimmick graphs).
-- **Aesthetic:** Modern Liquid Glass OS style (frosted glass cards, backdrop blur, translucent layers, sleek glass borders) with clean, node-and-line lattice elements.
+- **Logo:** the official brand logo (`public/brand/logo.png`) appears in the top bar and the welcome screen. A dark-variant image and an alternate image are also stored for later use.
+- **Personality:** Precise, Effortless, Professional, Smooth, Calm — clean and purposeful with zero fluff or meaningless graphs.
 
-## Color Palette
-Based on the official LATTICE logo and visual identity:
+## Direction
+Clean, **minimalist** UI inspired by **Raycast** (the macOS launcher app): calm surfaces, quiet borders, compact typography, one strong accent color used sparingly, and every chart/visual showing real meaning.
 
-1. **Background (Dark Mode — Default):** Deep Slate/Navy (`#0B0F19`) — translucent frosted glass layers hover over this deep backdrop.
-2. **Primary Accent (Free Account - Default):** LATTICE Magenta (`#E11D48` / `#F43F5E`) — used for standard UI highlights, energy nodes, and primary actions.
-3. **Pro Accent (PRO Account Exclusive):** Electric Cyan/Blue (`#0EA5E9` / `#38BDF8`) — exclusively unlocks when the user has a PRO account, giving a special blue glass glow to the dashboard.
-4. **Surface Cards (Liquid Glass OS):** Translucent Slate Glass (`rgba(30, 41, 59, 0.6)` with `backdrop-filter: blur(16px)` and subtle border `rgba(255, 255, 255, 0.1)`).
-6. **Text:** High-contrast White/Off-white (`#F8FAFC`) for headings, Muted Ice Blue (`#94A3B8`) for secondary labels.
+## Color Palette (design tokens)
+Both themes share the same structure; CSS variables switch automatically.
+
+**Dark mode (default)**
+- Background: near-black `#141416`
+- Cards/surfaces: `#1D1D21`, hover `#26262B`
+- Text: off-white `#F5F5F5`; muted `#9C9CA4`; faint `#6E6E76`
+- Accent (LATTICE magenta): `#E11D48`
+- Status: green = running/positive, amber = needs attention, magenta = needs action
+
+**Light mode**
+- Background: off-white `#FAFAFB`
+- Cards: pure white `#FFFFFF`, hover `#EDEDF0`
+- Text: near-black `#17171B`; muted `#707077`; faint `#A2A2AA`
+- Accent: deeper rose `#C81E42` (for contrast on white)
+
+**PRO accounts only:** Electric Blue accents (`#0EA5E9`) through the PRO toggle — free during demo.
 
 ## Typography
-- **Headings & Logo:** Geometric, wide sans-serif font (Space Grotesk or Rajdhani / Orbitron style) to match the techy "LATTICE" logotype.
-- **Body & Data:** Clean, highly readable sans-serif (Inter or Plus Jakarta Sans) with tabular numbers for live energy readings.
+- **Headings:** Plus Jakarta Sans ExtraBold, tight tracking — strong but calm.
+- **Body & data:** Plus Jakarta Sans; numbers in a monospace font (JetBrains Mono) so live watts line up.
+- Small uppercase micro-labels (`11px`) for section names — a Raycast habit.
 
-## Key Visual Signature Element
-- **Live Electricity Flow Diagram:** A clean, functional visual diagram showing power flowing from the main meter to rooms and appliances, where every line and indicator directly reflects real or simulated energy consumption (no useless fluff graphs).
+## Signature elements
+- **Device control list on the dashboard:** every connected device is a quiet row with a live watts readout and a **toggle switch to turn it on/off** (wattage smoothly falls to 0 / rises up).
+- **24-hour usage bars:** one-look daily curve for the whole home and per device — no gimmicks, values on hover.
+- **Big "₹ today" number** at the top of the dashboard — the answer to "what is this costing me".
 
-## Component Style
-- Tailwind CSS + DaisyUI / shadcn-style components.
-- Generous padding, smooth micro-animations, clean status badges (Green = Eco/Low, Yellow = Normal, Red = High Consumption).
-- Fully responsive layout that scales seamlessly from phone screens to desktop monitors.
+## Layout rules
+- Generous whitespace, max content width ~65rem, 14px card radius.
+- Navigation: simple top bar (desktop) / bottom bar (phone). No decorative backgrounds, no glow blobs, no glass blur.
+- Everything responsive from a phone up.

@@ -1,9 +1,9 @@
 import { useOutletContext } from 'react-router-dom';
-import { BarChart3, Shield, IndianRupee, Users, Info } from 'lucide-react';
+import { BarChart3, Shield, IndianRupee, Users, Info, Crown } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Insights() {
-  const { pro, activeColor } = useOutletContext();
+  const { activeColor } = useOutletContext();
   const [consent, setConsent] = useState(false);
   const [tariff, setTariff] = useState('8.00');
 
@@ -11,88 +11,73 @@ export default function Insights() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight">Insights & privacy</h1>
-        <p className="text-sm text-slate-400 mt-1">Your data stays yours. Every choice below is explained in plain words.</p>
+        <p className="text-[13px] text-muted mt-1">Your data stays yours. Every choice explained in plain words.</p>
       </div>
 
-      <div className="glass-panel rounded-3xl p-6 mb-5">
-        <div className="flex items-start gap-3 mb-3">
-          <div className={`w-10 h-10 rounded-xl ${activeColor} bg-white/5 flex items-center justify-center shrink-0`}>
-            <IndianRupee className="w-5 h-5" />
+      <div className="card p-5 mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent-soft)' }}>
+            <IndianRupee className="w-4 h-4" style={{ color: 'var(--accent)' }} />
           </div>
           <div>
-            <h2 className="font-bold">Electricity tariff</h2>
-            <p className="text-[12px] text-slate-500 mt-0.5">
-              Your tariff from the bill — LATTICE uses it to turn watts into rupees. Change it and every cost updates automatically.
-            </p>
+            <p className="font-bold text-[14px]">Electricity tariff</p>
+            <p className="text-[11px] text-faint">From your bill — watts become rupees. Change it and all costs update instantly.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 glass-button rounded-2xl px-4 py-3 max-w-[220px]">
-          <span className="text-sm font-mono">₹</span>
-          <input
-            value={tariff}
-            onChange={e => setTariff(e.target.value)}
-            className="bg-transparent outline-none text-sm font-mono flex-1"
-          />
-          <span className="text-[11px] text-slate-500">/ unit</span>
+        <div className="flex items-center gap-2 max-w-[200px]">
+          <span className="text-[13px] font-mono text-muted">₹</span>
+          <input value={tariff} onChange={e => setTariff(e.target.value)} className="input w-full font-mono" />
+          <span className="text-[11px] text-faint">/ unit</span>
         </div>
       </div>
 
-      <div className="glass-panel rounded-3xl p-6 mb-5">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-white/5 text-slate-300 flex items-center justify-center shrink-0">
-            <Shield className="w-5 h-5" />
+      <div className="card p-5 mb-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--surface-2)' }}>
+            <Shield className="w-4 h-4 text-muted" />
           </div>
-          <div>
-            <h2 className="font-bold">Share anonymous usage insights</h2>
-            <p className="text-[12px] text-slate-500 mt-0.5">
-              Optional. With your consent, we combine patterns like "average AC consumption" or "peak-use hours" —
-              <span className="text-slate-300"> no name, no address, no device identity</span> — and sell them to interested companies.
-              LATTICE may use this for future Pro planning too. You can withdraw anytime; your data is excluded from that point on.
+          <div className="flex-1">
+            <p className="font-bold text-[14px]">Share anonymous usage insights</p>
+            <p className="text-[11px] text-faint leading-relaxed">
+              Optional. With consent, we combine patterns like "average AC consumption" or "peak-use hours" —
+              <span className="text-muted"> no name, no address, no device identity</span> — and may sell them to interested companies.
+              Withdraw anytime; your data is then excluded.
             </p>
           </div>
         </div>
-
         <button
           onClick={() => setConsent(c => !c)}
-          className={`flex items-center justify-between w-full glass-button rounded-2xl px-4 py-3.5 transition-all ${
-            consent ? (pro ? 'border-sky-400/40' : 'border-rose-400/40') : ''
-          }`}
+          className="flex items-center justify-between w-full rounded-xl px-4 py-3 transition-colors"
+          style={{ background: consent ? 'var(--accent-soft)' : 'var(--surface-2)' }}
         >
-          <span className="flex items-center gap-2.5 text-sm font-semibold">
-            <Users className={`w-4 h-4 ${consent ? activeColor : 'text-slate-500'}`} />
+          <span className="flex items-center gap-2.5 text-[13px] font-bold">
+            <Users className="w-4 h-4" style={{ color: consent ? 'var(--accent)' : 'var(--text-muted)' }} />
             {consent ? 'Sharing is ON' : 'Sharing is OFF'}
           </span>
-          <span
-            className={`relative w-11 h-6 rounded-full transition-all ${
-              consent ? (pro ? 'bg-sky-500' : 'bg-rose-500') : 'bg-white/10'
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${consent ? 'left-[22px]' : 'left-0.5'}`}
-            />
-          </span>
+          <span className={`switch ${consent ? 'on' : ''}`} />
         </button>
-        <p className="text-[11px] text-slate-600 mt-3 flex items-start gap-1.5">
+        <p className="text-[11px] text-faint mt-3 flex items-start gap-1.5">
           <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-          In the final build this is stored in your account and reversible at any time from this screen.
+          In the final build this is stored in your account and reversible any time from this screen.
         </p>
       </div>
 
-      {!pro && (
-        <div className="glass-panel-pro rounded-3xl p-6 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center shrink-0">
-            <BarChart3 className="w-5 h-5" />
+      <div className="card p-5" style={{ borderColor: 'rgba(14,165,233,0.35)' }}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(14,165,233,0.15)' }}>
+            <Crown className="w-4 h-4 text-sky-400" />
           </div>
-          <div>
-            <h2 className="font-bold text-sky-200">Upgrade to PRO</h2>
-            <p className="text-[12px] text-sky-100/60 mt-0.5">Electric Blue mode, tariff discounts and deeper insights — FREE during demo.</p>
+          <div className="flex-1">
+            <p className="font-bold text-[14px] text-sky-300">LATTICE PRO</p>
+            <p className="text-[11px] text-sky-200/60">Electric Blue mode, tariff discounts, deeper insights — FREE during the demo.</p>
           </div>
+          <BarChart3 className="w-4 h-4 text-sky-400/60 shrink-0" />
         </div>
-      )}
+      </div>
 
-      <p className="text-[11px] text-slate-600 mt-4 leading-relaxed">
-        Free projects on Supabase sleep after 7 days unused — the morning of any demo, log into supabase.com and unpause
-        your project so your saved data features work.
+      <p className="text-[11px] text-faint mt-4 leading-relaxed">
+        Free Supabase projects sleep after 7 days unused — the morning of any demo, log into supabase.com and
+        unpause your project so your saved-data features work.
       </p>
     </div>
   );
