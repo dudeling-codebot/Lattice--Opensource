@@ -1,8 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { Plug, Cpu, IndianRupee, ArrowRight } from 'lucide-react';
 
-export default function Welcome() {
+export default function Welcome({ onStart }) {
   const navigate = useNavigate();
+
+  const start = () => {
+    onStart();
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -40,7 +45,7 @@ export default function Welcome() {
           </div>
 
           <button
-            onClick={() => navigate('/')}
+            onClick={start}
             className="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-2xl py-3.5 flex items-center justify-center gap-2 transition-all glow-magenta"
           >
             Continue as demo user <ArrowRight className="w-4 h-4" />
