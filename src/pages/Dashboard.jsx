@@ -1,20 +1,21 @@
 import { useOutletContext, Link } from 'react-router-dom';
-import { Bolt, Zap, Power, ChevronRight, Home } from 'lucide-react';
+import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play } from 'lucide-react';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile } from '../data/mockData.js';
 
 export default function Dashboard() {
-  const { pro, activeColor } = useOutletContext();
-  const { devices, paused, setPaused, toggleDevice, totalWatts, totalToday, totalMonth } = useEnergy();
+  const { pro } = useOutletContext();
+  const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, totalWatts, totalToday, totalMonth } = useEnergy();
 
   const onDevices = devices.filter(d => d.status === 'on');
   const offDevices = devices.filter(d => d.status !== 'on');
-  const hours = Array.from({ length: 24 }, (_, i) => {
-    const sum = devices.reduce((s, d) => s + (dailyProfile(d, i * 7)[i]?.watts ?? 0), 0);
-    return { hour: i, watts: Math.round(sum) };
-  });
+  const hours = Array.from({ length: 24 }, (_, i) => ({
+    hour: i,
+    watts: devices.reduce((s, d) => s + (dailyProfile(d, i * 7)[i]?.watts ?? 0), 0),
+  }));
   const maxW = Math.max(...hours.map(h => h.watts), 1);
   const hogs = [...devices].filter(d => d.monthCost > 0).sort((a, b) => b.monthCost - a.monthCost).slice(0, 3);
+  const delta = totalToday - mockHome.yesterdayTotal;
 
   const DeviceRow = ({ d }) => (
     <div className="flex items-center gap-3 py-2.5">
@@ -36,8 +37,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Hero */}
-      <div className="card p-5 sm:p-6 mb-5">
+      <div className="card p-5 sm:p-6 mb-4">
         <div className="flex items-center justify-between mb-4">
           <span className="label">{mockHome.name} · Home Assistant</span>
           <span className="flex items-center gap-1.5 text-[11px] font-bold">
@@ -58,6 +58,9 @@ export default function Dashboard() {
               <span className="chip" style={{ background: 'var(--surface-2)' }}>
                 ≈ ₹{Math.round(totalMonth).toLocaleString('en-IN')}/month
               </span>
+              <span className="chip" style={{ background: delta > 0 ? 'var(--amber-soft)' : 'var(--green-soft)', color: delta > 0 ? 'var(--amber)' : 'var(--green)' }}>
+                {delta > 0 ? '+' : '−'}₹{Math.abs(delta)} vs yesterday
+              </span>
             </div>
           </div>
           <button onClick={() => setPaused(p => !p)} className="btn btn-ghost !px-3 !py-2">
@@ -65,28 +68,45 @@ export default function Dashboard() {
             {paused ? 'Resume' : 'Pause'}
           </button>
         </div>
+      </div>
 
-        {/* 24h total usage */}
-        <div className="mt-6">
-          <p className="label mb-2">Today's usage — whole home (watts)</p>
-          <div className="flex items-end gap-[3px] h-16">
-            {hours.map(h => (
-              <div
-                key={h.hour}
-                className={`bar flex-1 ${h.watts > 0 ? '' : 'off'}`}
-                style={{ height: `${Math.max(5, (h.watts / maxW) * 100)}%` }}
-                title={`${h.hour}:00 — ${h.watts} W`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-[9px] text-faint mt-1.5 font-mono">
-            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
-          </div>
+      {/* Quick actions */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <p className="label mr-1">Quick actions</p>
+        <button onClick={() => setAll('on')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]">
+          <Play className="w-3 h-3" /> All on
+        </button>
+        <button onClick={nightMode} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]">
+          <Moon className="w-3 h-3" /> Night mode <span className="text-faint">(fridge stays)</span>
+        </button>
+        <button onClick={() => setAll('off')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]">
+          <Power className="w-3 h-3" /> All off
+        </button>
+      </div>
+
+      {/* Today's curve */}
+      <div className="card p-5 mb-4">
+        <p className="label mb-2">Today's usage — whole home (watts)</p>
+        <div className="flex items-end gap-[3px] h-16">
+          {hours.map(h => (
+            <div
+              key={h.hour}
+              className={`bar flex-1 ${h.watts > 0 ? '' : 'off'}`}
+              style={{ height: `${Math.max(5, (h.watts / maxW) * 100)}%` }}
+              title={`${h.hour}:00 — ${h.watts} W`}
+            />
+          ))}
         </div>
+        <div className="flex justify-between text-[9px] text-faint mt-1.5 font-mono">
+          <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
+        </div>
+        <Link to="/usage" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>
+          Full usage breakdown <ChevronRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Live device control */}
-      <div className="card p-5 mb-5">
+      <div className="card p-5 mb-4">
         <div className="flex items-center justify-between mb-2">
           <p className="font-bold text-[15px]">Devices</p>
           <span className="text-[11px] text-muted">
@@ -102,16 +122,26 @@ export default function Dashboard() {
       </div>
 
       {/* Rooms */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {mockHome.rooms.map(r => {
           const dvs = devices.filter(d => d.room === r.name);
           const w = dvs.reduce((s, d) => s + d.currentWatts, 0);
           const c = dvs.reduce((s, d) => s + d.monthCost, 0);
+          const roomOn = dvs.some(d => d.status === 'on');
           return (
             <div key={r.id} className="card card-hover p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Home className="w-4 h-4 text-muted" />
-                <p className="text-[13px] font-bold truncate">{r.name}</p>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Home className="w-4 h-4 text-muted shrink-0" />
+                  <p className="text-[13px] font-bold truncate">{r.name}</p>
+                </div>
+                {dvs.length > 0 && (
+                  <button
+                    onClick={() => toggleRoom(r.name)}
+                    className={`switch ${roomOn ? 'on' : ''} scale-90`}
+                    title={roomOn ? 'Switch off room' : 'Switch on room'}
+                  />
+                )}
               </div>
               <p className="text-[11px] font-mono" style={{ color: w > 0 ? 'var(--text)' : 'var(--text-faint)' }}>
                 {w > 0 ? `${w} W` : 'idle'}
@@ -124,15 +154,21 @@ export default function Dashboard() {
 
       {/* Energy hogs */}
       <div className="card p-5">
-        <p className="font-bold text-[15px] mb-1">Energy hogs — this month</p>
+        <div className="flex items-center justify-between mb-1">
+          <p className="font-bold text-[15px]">Energy hogs — this month</p>
+          <Link to="/usage" className="text-[12px] font-bold" style={{ color: 'var(--accent)' }}>see all →</Link>
+        </div>
         <p className="text-[11px] text-faint mb-3">The three appliances costing you the most.</p>
         {hogs.map((d, i) => (
           <div key={d.id} className="flex items-center gap-3 py-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--surface-2)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: i === 0 ? 'var(--amber-soft)' : 'var(--surface-2)' }}>
               {i === 0 ? <Bolt className="w-3.5 h-3.5 text-amber-400" /> : <Zap className="w-3.5 h-3.5 text-muted" />}
             </div>
             <p className="flex-1 text-[13px] font-semibold truncate">{d.name}</p>
-            <p className="text-[13px] font-bold" style={{ color: i === 0 ? 'var(--accent)' : 'var(--text)' }}>
+            <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
+              <div className="h-full rounded-full" style={{ width: `${100 - i * 25}%`, background: i === 0 ? 'var(--amber)' : 'var(--accent)' }} />
+            </div>
+            <p className="text-[13px] font-bold w-[86px] text-right" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text)' }}>
               ₹{d.monthCost.toLocaleString('en-IN')}
             </p>
           </div>

@@ -49,12 +49,63 @@ export function EnergyProvider({ children }) {
     );
   };
 
+  const toggleRoom = roomName => {
+    const roomDevices = devices.filter(d => d.room === roomName && d.status !== 'paused');
+    const anyOn = roomDevices.some(d => d.status === 'on');
+    setDevices(prev =>
+      prev.map(d => {
+        if (d.room !== roomName || d.status === 'paused') return d;
+        const on = !anyOn;
+        const next = { ...d, status: on ? 'on' : 'off' };
+        targetsRef.current[d.id] = on ? next.baseWatts * (0.45 + Math.random() * 0.5) : 0;
+        return next;
+      })
+    );
+  };
+
+  const setAll = status => {
+    setDevices(prev =>
+      prev.map(d => {
+        if (status === 'on' && d.status === 'paused') return d;
+        const on = status === 'on';
+        const next = { ...d, status: on ? 'on' : 'off' };
+        targetsRef.current[d.id] = on ? next.baseWatts * (0.45 + Math.random() * 0.5) : 0;
+        return next;
+      })
+    );
+  };
+
+  const nightMode = () => {
+    setDevices(prev =>
+      prev.map(d => {
+        if (d.status === 'paused') return d;
+        const on = d.name.toLowerCase().includes('refrigerator');
+        const next = { ...d, status: on ? 'on' : 'off' };
+        targetsRef.current[d.id] = on ? next.baseWatts * (0.45 + Math.random() * 0.5) : 0;
+        return next;
+      })
+    );
+  };
+
   const totalWatts = devices.reduce((s, d) => s + d.currentWatts, 0);
   const totalToday = devices.reduce((s, d) => s + d.todayCost, 0);
   const totalMonth = devices.reduce((s, d) => s + d.monthCost, 0);
 
   return (
-    <EnergyContext.Provider value={{ devices, paused, setPaused, toggleDevice, totalWatts, totalToday, totalMonth }}>
+    <EnergyContext.Provider
+      value={{
+        devices,
+        paused,
+        setPaused,
+        toggleDevice,
+        toggleRoom,
+        setAll,
+        nightMode,
+        totalWatts,
+        totalToday,
+        totalMonth,
+      }}
+    >
       {children}
     </EnergyContext.Provider>
   );

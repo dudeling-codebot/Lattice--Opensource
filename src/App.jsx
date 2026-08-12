@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Shell from './components/Shell.jsx';
 import Welcome from './pages/Welcome.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Usage from './pages/Usage.jsx';
 import Connect from './pages/Connect.jsx';
 import Devices from './pages/Devices.jsx';
 import DeviceDetail from './pages/DeviceDetail.jsx';
@@ -47,6 +48,7 @@ export default function App() {
           />
           <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/usage" element={<Usage />} />
             <Route path="/connect" element={<Connect />} />
             <Route path="/devices" element={<Devices />} />
             <Route path="/device/:id" element={<DeviceDetail />} />

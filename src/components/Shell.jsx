@@ -1,9 +1,10 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Plug, Cpu, BarChart3, Sun, Moon, Crown } from 'lucide-react';
+import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/usage', label: 'Usage', icon: TrendingUp },
   { to: '/connect', label: 'Connect', icon: Plug },
   { to: '/devices', label: 'Devices', icon: Cpu },
   { to: '/insights', label: 'Insights', icon: BarChart3 },

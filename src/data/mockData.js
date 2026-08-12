@@ -3,6 +3,8 @@ export const mockHome = {
   tariff: 8.0,
   hubConnected: true,
   hubType: "Home Assistant",
+  lastMonthTotal: 4120,
+  yesterdayTotal: 138,
   rooms: [
     { id: "r1", name: "Living Room", devices: ["d1", "d2"] },
     { id: "r2", name: "Master Bedroom", devices: ["d3"] },
@@ -80,6 +82,8 @@ export const mockHome = {
   ],
 };
 
+export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 export function dailyProfile(device, seed) {
   const hours = [];
   for (let h = 0; h < 24; h++) {
@@ -91,4 +95,9 @@ export function dailyProfile(device, seed) {
     });
   }
   return hours;
+}
+
+export function weekTotals(totalMonth) {
+  const factors = [0.82, 0.9, 1.04, 0.95, 1.12, 1.26, 0.88];
+  return factors.map(f => Math.round((totalMonth / 30) * f));
 }
