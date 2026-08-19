@@ -101,3 +101,40 @@ export function weekTotals(totalMonth) {
   const factors = [0.82, 0.9, 1.04, 0.95, 1.12, 1.26, 0.88];
   return factors.map(f => Math.round((totalMonth / 30) * f));
 }
+
+export const anomalies = [
+  {
+    deviceId: 'd1',
+    title: 'Living Room AC',
+    kind: 'high',
+    icon: 'warn',
+    aboveUsualPercent: 32,
+    extraCostWeek: 42,
+    insight: 'AC usage unusually high — check timer/evening usage',
+  },
+  {
+    room: 'Kitchen',
+    title: 'Kitchen',
+    kind: 'high',
+    icon: 'bulb',
+    aboveUsualPercent: 18,
+    extraCostWeek: 55,
+    insight: 'Kitchen usage increased — check which devices caused it',
+  },
+  {
+    deviceId: 'd4',
+    title: 'Refrigerator',
+    kind: 'normal',
+    icon: 'ok',
+    aboveUsualPercent: 0,
+    extraCostWeek: 0,
+    insight: 'Refrigerator normal — no action needed',
+  },
+];
+
+export function potentialSavings() {
+  const weekly = anomalies
+    .filter(a => a.kind === 'high')
+    .reduce((s, a) => s + a.extraCostWeek, 0);
+  return Math.round((weekly * 52) / 12);
+}

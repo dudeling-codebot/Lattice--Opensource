@@ -1,7 +1,7 @@
 import { useOutletContext, Link } from 'react-router-dom';
-import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play } from 'lucide-react';
+import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles } from 'lucide-react';
 import { useEnergy } from '../context/EnergyContext.jsx';
-import { mockHome, dailyProfile } from '../data/mockData.js';
+import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
 
 export default function Dashboard() {
   const { pro } = useOutletContext();
@@ -16,6 +16,9 @@ export default function Dashboard() {
   const maxW = Math.max(...hours.map(h => h.watts), 1);
   const hogs = [...devices].filter(d => d.monthCost > 0).sort((a, b) => b.monthCost - a.monthCost).slice(0, 3);
   const delta = totalToday - mockHome.yesterdayTotal;
+  const waste = anomalies.find(a => a.deviceId && a.kind === 'high');
+  const savings = potentialSavings();
+  const maxHog = hogs[0]?.monthCost || 1;
 
   const DeviceRow = ({ d }) => (
     <div className="flex items-center gap-3 py-2.5">
@@ -67,6 +70,38 @@ export default function Dashboard() {
             <Power className="w-3.5 h-3.5" />
             {paused ? 'Resume' : 'Pause'}
           </button>
+        </div>
+      </div>
+
+      {/* Waste detection + potential savings */}
+      <div className="grid sm:grid-cols-2 gap-3 mb-4">
+        <div className="card p-5" style={{ borderColor: 'rgba(251,191,36,0.3)' }}>
+          <span className="chip" style={{ background: 'var(--amber-soft)', color: 'var(--amber)' }}>
+            <AlertTriangle className="w-3.5 h-3.5" /> Potential Energy Waste
+          </span>
+          <p className="text-[13.5px] leading-snug mt-3">
+            <span className="font-extrabold">{waste.title}</span> is using{' '}
+            <span className="font-extrabold" style={{ color: 'var(--amber)' }}>
+              {waste.aboveUsualPercent}% more energy than usual.
+            </span>
+          </p>
+          <p className="text-[12px] text-muted mt-1.5">
+            Estimated extra cost:{' '}
+            <span className="font-bold" style={{ color: 'var(--amber)' }}>₹{waste.extraCostWeek} this week.</span>
+          </p>
+          <Link to="/insights" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--amber)' }}>
+            View insight <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="card p-5" style={{ borderColor: 'rgba(52,211,153,0.3)' }}>
+          <span className="chip" style={{ background: 'var(--green-soft)', color: 'var(--green)' }}>
+            <Sparkles className="w-3.5 h-3.5" /> Potential Savings
+          </span>
+          <p className="text-[32px] font-extrabold leading-none mt-3" style={{ color: 'var(--green)' }}>
+            ₹{savings.toLocaleString('en-IN')}<span className="text-[13px] font-bold text-muted">/month</span>
+          </p>
+          <p className="text-[12px] text-muted mt-1.5">Based on unusual usage patterns.</p>
         </div>
       </div>
 
@@ -152,27 +187,37 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Energy hogs */}
+      {/* Highest energy consumers */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-1">
-          <p className="font-bold text-[15px]">Energy hogs — this month</p>
+          <p className="font-bold text-[15px]">Highest Energy Consumers</p>
           <Link to="/usage" className="text-[12px] font-bold" style={{ color: 'var(--accent)' }}>see all →</Link>
         </div>
-        <p className="text-[11px] text-faint mb-3">The three appliances costing you the most.</p>
-        {hogs.map((d, i) => (
-          <div key={d.id} className="flex items-center gap-3 py-2.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: i === 0 ? 'var(--amber-soft)' : 'var(--surface-2)' }}>
-              {i === 0 ? <Bolt className="w-3.5 h-3.5 text-amber-400" /> : <Zap className="w-3.5 h-3.5 text-muted" />}
+        <p className="text-[11px] text-faint mb-3">Ranked by monthly cost — abnormal devices flagged.</p>
+        {hogs.map((d, i) => {
+          const anom = anomalies.find(a => a.deviceId === d.id && a.kind === 'high');
+          return (
+            <div key={d.id} className="flex items-center gap-3 py-2.5">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: i === 0 ? 'var(--amber-soft)' : 'var(--surface-2)' }}>
+                {i === 0 ? <Bolt className="w-3.5 h-3.5 text-amber-400" /> : <Zap className="w-3.5 h-3.5 text-muted" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] font-semibold truncate">{d.name}</p>
+                {anom && (
+                  <p className="text-[11px] font-bold flex items-center gap-1 mt-0.5" style={{ color: 'var(--amber)' }}>
+                    <AlertTriangle className="w-3 h-3" /> {anom.aboveUsualPercent}% above usual
+                  </p>
+                )}
+              </div>
+              <div className="w-24 h-1.5 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-2)' }}>
+                <div className="h-full rounded-full" style={{ width: `${Math.max(8, (d.monthCost / maxHog) * 100)}%`, background: i === 0 ? 'var(--amber)' : 'var(--accent)' }} />
+              </div>
+              <p className="text-[13px] font-bold w-[86px] text-right shrink-0" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text)' }}>
+                ₹{d.monthCost.toLocaleString('en-IN')}
+              </p>
             </div>
-            <p className="flex-1 text-[13px] font-semibold truncate">{d.name}</p>
-            <div className="w-24 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--surface-2)' }}>
-              <div className="h-full rounded-full" style={{ width: `${100 - i * 25}%`, background: i === 0 ? 'var(--amber)' : 'var(--accent)' }} />
-            </div>
-            <p className="text-[13px] font-bold w-[86px] text-right" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text)' }}>
-              ₹{d.monthCost.toLocaleString('en-IN')}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

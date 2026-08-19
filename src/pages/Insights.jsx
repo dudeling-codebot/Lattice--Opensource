@@ -1,6 +1,7 @@
 import { useOutletContext } from 'react-router-dom';
-import { BarChart3, Shield, IndianRupee, Users, Info, Crown } from 'lucide-react';
+import { BarChart3, Shield, IndianRupee, Users, Info, Crown, AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
+import { anomalies } from '../data/mockData.js';
 
 export default function Insights() {
   const { activeColor } = useOutletContext();
@@ -12,6 +13,33 @@ export default function Insights() {
       <div className="mb-6">
         <h1 className="text-2xl font-extrabold tracking-tight">Insights & privacy</h1>
         <p className="text-[13px] text-muted mt-1">Your data stays yours. Every choice explained in plain words.</p>
+      </div>
+
+      <div className="card p-5 mb-4">
+        <p className="label mb-3">What's worth your attention</p>
+        <div className="space-y-2.5">
+          {anomalies.map(a => {
+            const warn = a.kind === 'high';
+            return (
+              <div
+                key={a.title}
+                className="flex items-start gap-3 rounded-xl px-3.5 py-3"
+                style={{ background: warn ? 'var(--amber-soft)' : 'var(--green-soft)' }}
+              >
+                <span className="shrink-0" style={{ color: warn ? 'var(--amber)' : 'var(--green)' }}>
+                  {a.icon === 'bulb' ? (
+                    <Lightbulb className="w-4 h-4" />
+                  ) : a.icon === 'ok' ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4" />
+                  )}
+                </span>
+                <p className="text-[13px] font-semibold leading-snug">{a.insight}</p>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="card p-5 mb-4">
