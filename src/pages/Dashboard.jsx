@@ -1,5 +1,5 @@
 import { useOutletContext, Link } from 'react-router-dom';
-import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles, Menu, X, SlidersHorizontal, Activity, LayoutGrid } from 'lucide-react';
+import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles, X, SlidersHorizontal, Activity, LayoutGrid } from 'lucide-react';
 import { useState } from 'react';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
@@ -54,7 +54,7 @@ export default function Dashboard() {
   );
 
   const Widget = ({ id, label, title, icon: Icon, children, pullout }) => (
-    <div className="card relative overflow-hidden flex flex-col min-h-[220px]">
+    <div className="card relative overflow-hidden flex flex-col">
       <div className="flex items-center justify-between px-5 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div className="flex items-center gap-2">
           {Icon && <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-2)' }}><Icon className="w-3.5 h-3.5 text-muted" /></span>}
@@ -69,7 +69,7 @@ export default function Dashboard() {
           </button>
         )}
       </div>
-      <div className="flex-1 overflow-auto p-5 min-h-0">
+      <div className="p-5">
         {children}
       </div>
       {pullout && widgetDrawer === id && (
@@ -90,11 +90,11 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Bento grid — occupies entire viewport on xl, no page scroll */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 xl:h-[calc(100vh-5.5rem)] xl:overflow-hidden">
-        {/* Left column — 5 cols */}
-        <div className="xl:col-span-5 flex flex-col gap-4 xl:overflow-y-auto xl:pr-1 xl:min-h-0 scrollbar-thin">
+    <div className="flex flex-col gap-4 pb-6">
+      {/* Natural grid — no forced viewport height, no inner scrollbars. Page scrolls normally. */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+        {/* Left column */}
+        <div className="xl:col-span-5 flex flex-col gap-4">
           <Widget
             id="spend"
             label={`${mockHome.name} · Home Assistant`}
@@ -150,17 +150,16 @@ export default function Dashboard() {
             <Link to="/usage" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Full breakdown <ChevronRight className="w-3.5 h-3.5" /></Link>
           </Widget>
 
-          <div className="card p-4 flex items-center gap-2">
+          <div className="card p-4 flex flex-wrap items-center gap-2">
             <span className="label mr-1">Quick actions</span>
             <button onClick={() => setAll('on')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Play className="w-3 h-3" /> All on</button>
             <button onClick={nightMode} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Moon className="w-3 h-3" /> Night</button>
             <button onClick={() => setAll('off')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Power className="w-3 h-3" /> All off</button>
-            <button onClick={()=>setWidgetDrawer('quick')} className="ml-auto btn btn-ghost !p-2"><Menu className="w-4 h-4" /></button>
           </div>
         </div>
 
-        {/* Right column — 7 cols */}
-        <div className="xl:col-span-7 flex flex-col gap-4 xl:overflow-y-auto xl:pr-1 xl:min-h-0">
+        {/* Right column */}
+        <div className="xl:col-span-7 flex flex-col gap-4">
           <div className="card relative overflow-hidden flex flex-col">
             <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
               <div>
@@ -169,7 +168,7 @@ export default function Dashboard() {
               </div>
               <button onClick={()=>setWidgetDrawer(widgetDrawer==='floors'?null:'floors')} className="btn btn-ghost !p-2"><SlidersHorizontal className="w-4 h-4" /></button>
             </div>
-            <div className="p-0 flex-1 overflow-auto">
+            <div className="p-0">
               <FloorCircular />
             </div>
             {widgetDrawer==='floors' && (
@@ -193,7 +192,7 @@ export default function Dashboard() {
               <Link to="/devices" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center">Add device →</Link>
             </>
           }>
-            <div className="divide-y max-h-[280px] overflow-auto pr-1" style={{ borderColor: 'var(--border)' }}>
+            <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {devices.map(d => <DeviceRow key={d.id} d={d} />)}
             </div>
             <Link to="/devices" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Manage & identify devices <ChevronRight className="w-3.5 h-3.5" /></Link>
