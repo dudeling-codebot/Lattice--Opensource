@@ -110,6 +110,17 @@ export function EnergyProvider({ children }) {
     return newDev;
   };
 
+  const setRoomState = (roomName, on) => {
+    setDevices(prev =>
+      prev.map(d => {
+        if (d.room !== roomName) return d;
+        const next = { ...d, status: on ? 'on' : 'off' };
+        targetsRef.current[d.id] = on ? next.baseWatts * (0.55) : 0;
+        return next;
+      })
+    );
+  };
+
   const totalWatts = devices.reduce((s, d) => s + d.currentWatts, 0);
   const totalToday = devices.reduce((s, d) => s + d.todayCost, 0);
   const totalMonth = devices.reduce((s, d) => s + d.monthCost, 0);
@@ -125,6 +136,7 @@ export function EnergyProvider({ children }) {
         setAll,
         nightMode,
         addDevice,
+        setRoomState,
         totalWatts,
         totalToday,
         totalMonth,

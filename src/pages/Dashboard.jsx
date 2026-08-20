@@ -8,7 +8,7 @@ import HourlyLineGraph from '../components/HourlyLineGraph.jsx';
 
 export default function Dashboard() {
   const { pro } = useOutletContext();
-  const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, totalWatts, totalToday, totalMonth } = useEnergy();
+  const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, setRoomState, totalWatts, totalToday, totalMonth } = useEnergy();
   const [pendingRoom, setPendingRoom] = useState(null);
   const [widgetDrawer, setWidgetDrawer] = useState(null);
 
@@ -54,7 +54,7 @@ export default function Dashboard() {
   );
 
   const Widget = ({ id, label, title, icon: Icon, children, pullout }) => (
-    <div className="card relative overflow-hidden flex flex-col">
+    <div className="card relative overflow-hidden flex flex-col min-h-[220px]">
       <div className="flex items-center justify-between px-5 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div className="flex items-center gap-2">
           {Icon && <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-2)' }}><Icon className="w-3.5 h-3.5 text-muted" /></span>}
@@ -69,7 +69,7 @@ export default function Dashboard() {
           </button>
         )}
       </div>
-      <div className="p-5">
+      <div className="p-5 flex-1 no-scrollbar" style={{ overflow: 'auto' }}>
         {children}
       </div>
       {pullout && widgetDrawer === id && (
@@ -91,157 +91,167 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      {/* Natural grid — items fill available width, no inner scrollbars. Page scrolls normally. */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
-
-        {/* Floors — full-width hero, one distinct circle per floor */}
-        <div className="xl:col-span-12">
-          <div className="card relative overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-              <div>
-                <p className="text-[10px] font-bold tracking-widest uppercase text-faint">Widgets</p>
-                <p className="text-[13px] font-extrabold">Floors — energy by floor</p>
+      {/* Ordered widgets 01→08 — natural height, no viewport clamp, bars hidden */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 auto-rows-min">
+        {/* 1 — Spend */}
+        <Widget
+          id="spend"
+          label={`${mockHome.name} · Home Assistant`}
+          title="01 · Estimated spend today"
+          icon={Zap}
+          pullout={
+            <>
+              <p className="text-[12px] text-muted leading-relaxed">Live total updates every 300ms. Tariff ₹{mockHome.tariff}/unit.</p>
+              <button onClick={() => setPaused(p => !p)} className="btn btn-ghost w-full justify-center"><Power className="w-4 h-4" /> {paused ? 'Resume live' : 'Pause live'}</button>
+              <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: paused ? 'rgba(100,116,139,0.15)' : 'var(--green-soft)' }}>
+                <span className={`w-2 h-2 rounded-full ${paused ? 'bg-slate-500' : 'bg-emerald-400'}`} />
+                <span className="text-[12px] font-bold" style={{ color: paused ? 'var(--text-muted)' : 'var(--green)' }}>{paused ? 'Paused — values frozen' : 'Live — updating'}</span>
               </div>
-              <button onClick={()=>setWidgetDrawer(widgetDrawer==='floors'?null:'floors')} className="btn btn-ghost !p-2"><SlidersHorizontal className="w-4 h-4" /></button>
-            </div>
-            <div className="p-5">
-              <FloorCircular />
-            </div>
-            {widgetDrawer==='floors' && (
-              <div className="absolute inset-0 z-10 flex">
-                <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setWidgetDrawer(null)} />
-                <div className="w-[78%] max-w-[320px] h-full overflow-auto p-4 shadow-2xl" style={{ background: 'var(--surface)', borderLeft:'1px solid var(--border)'}}>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-extrabold text-[13px]">Floors — help</p>
-                    <button onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost !p-1.5"><X className="w-4 h-4"/></button>
-                  </div>
-                  <p className="text-[12px] text-muted leading-relaxed">One circle per floor, each with its own colour. The arc shows that floor's share of the day's total — tap a circle to focus, use the day chips to step through the week. Full floor logbook is in Logbook → Floors.</p>
-                  <Link to="/logbook" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center mt-3">Open Logbook →</Link>
-                </div>
+            </>
+          }
+        >
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[40px] font-black leading-none tracking-tight">₹{totalToday.toLocaleString('en-IN')}</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}><Zap className="w-3 h-3" /> {totalWatts.toLocaleString('en-IN')} W live</span>
+                <span className="chip" style={{ background: 'var(--surface-2)' }}>≈ ₹{Math.round(totalMonth).toLocaleString('en-IN')}/mo</span>
+                <span className="chip" style={{ background: delta > 0 ? 'var(--amber-soft)' : 'var(--green-soft)', color: delta > 0 ? 'var(--amber)' : 'var(--green)' }}>{delta > 0 ? '+' : '−'}₹{Math.abs(delta)} vs yesterday</span>
               </div>
-            )}
+            </div>
+            <span className={`hidden sm:flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${paused ? 'bg-slate-500 text-white' : 'bg-emerald-500 text-white'}`}>{paused ? 'paused' : 'live'}</span>
           </div>
+        </Widget>
+
+        {/* 2 — Waste & Savings */}
+        <Widget id="insights" label="Attention" title="02 · Waste & Savings" icon={Sparkles} pullout={<p className="text-[12px] text-muted">Insights are on the Insights tab. This widget shows top waste + potential savings.</p>}>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl p-4 border" style={{ borderColor: 'rgba(251,191,36,0.3)', background: 'var(--amber-soft)' }}>
+              <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><AlertTriangle className="w-3.5 h-3.5" /> Potential Waste</p>
+              <p className="text-[13px] font-extrabold mt-2 leading-snug">{waste.title} <span style={{ color: 'var(--amber)' }}>+{waste.aboveUsualPercent}%</span></p>
+              <p className="text-[11px] text-muted mt-1">Extra <span className="font-bold" style={{ color: 'var(--amber)' }}>₹{waste.extraCostWeek}/wk</span></p>
+              <Link to="/insights" className="text-[11px] font-bold mt-2 inline-flex items-center gap-1" style={{ color: 'var(--amber)' }}>View <ChevronRight className="w-3 h-3" /></Link>
+            </div>
+            <div className="rounded-xl p-4 border" style={{ borderColor: 'rgba(52,211,153,0.3)', background: 'var(--green-soft)' }}>
+              <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--green)' }}><Sparkles className="w-3.5 h-3.5" /> Savings</p>
+              <p className="text-[22px] font-black leading-none mt-2" style={{ color: 'var(--green)' }}>₹{savings}<span className="text-[11px] font-bold text-muted">/mo</span></p>
+              <p className="text-[11px] text-muted">Unusual patterns</p>
+            </div>
+          </div>
+        </Widget>
+
+        {/* 3 — Quick actions — ordered */}
+        <div className="card p-4 flex flex-wrap items-center gap-2 xl:col-span-2">
+          <span className="label">03 · Quick actions</span>
+          <button onClick={() => setAll('on')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Play className="w-3 h-3" /> All on</button>
+          <button onClick={nightMode} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Moon className="w-3 h-3" /> Night</button>
+          <button onClick={() => setAll('off')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Power className="w-3 h-3" /> All off</button>
+          <span className="text-[11px] text-faint ml-auto hidden sm:inline">Widgets in order 01→08</span>
         </div>
 
-        {/* Left column */}
-        <div className="xl:col-span-6 flex flex-col gap-4">
-          <Widget
-            id="spend"
-            label={`${mockHome.name} · Home Assistant`}
-            title="Estimated spend today"
-            icon={Zap}
-            pullout={
-              <>
-                <p className="text-[12px] text-muted leading-relaxed">Live total updates every 300ms. Tariff ₹{mockHome.tariff}/unit.</p>
-                <button onClick={() => setPaused(p => !p)} className="btn btn-ghost w-full justify-center"><Power className="w-4 h-4" /> {paused ? 'Resume live' : 'Pause live'}</button>
-                <div className="rounded-xl p-3 flex items-center gap-2" style={{ background: paused ? 'rgba(100,116,139,0.15)' : 'var(--green-soft)' }}>
-                  <span className={`w-2 h-2 rounded-full ${paused ? 'bg-slate-500' : 'bg-emerald-400'}`} />
-                  <span className="text-[12px] font-bold" style={{ color: paused ? 'var(--text-muted)' : 'var(--green)' }}>{paused ? 'Paused — values frozen' : 'Live — updating'}</span>
-                </div>
-              </>
-            }
-          >
-            <div className="flex items-end justify-between gap-4">
+        {/* 4 — Floors circular */}
+        <div className="xl:col-span-2 card relative overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-2)' }}><LayoutGrid className="w-3.5 h-3.5 text-muted" /></span>
               <div>
-                <p className="text-[40px] font-black leading-none tracking-tight">₹{totalToday.toLocaleString('en-IN')}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="chip" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}><Zap className="w-3 h-3" /> {totalWatts.toLocaleString('en-IN')} W live</span>
-                  <span className="chip" style={{ background: 'var(--surface-2)' }}>≈ ₹{Math.round(totalMonth).toLocaleString('en-IN')}/mo</span>
-                  <span className="chip" style={{ background: delta > 0 ? 'var(--amber-soft)' : 'var(--green-soft)', color: delta > 0 ? 'var(--amber)' : 'var(--green)' }}>{delta > 0 ? '+' : '−'}₹{Math.abs(delta)} vs yesterday</span>
-                </div>
-              </div>
-              <span className={`hidden sm:flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${paused ? 'bg-slate-500 text-white' : 'bg-emerald-500 text-white'}`}>{paused ? 'paused' : 'live'}</span>
-            </div>
-          </Widget>
-
-          <Widget id="insights" label="Attention" title="Waste & Savings" icon={Sparkles} pullout={<p className="text-[12px] text-muted">Insights are on the Insights tab. This widget shows top waste + potential savings.</p>}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-3">
-              <div className="rounded-xl p-4 border" style={{ borderColor: 'rgba(251,191,36,0.3)', background: 'var(--amber-soft)' }}>
-                <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><AlertTriangle className="w-3.5 h-3.5" /> Potential Waste</p>
-                <p className="text-[13px] font-extrabold mt-2 leading-snug">{waste.title} <span style={{ color: 'var(--amber)' }}>+{waste.aboveUsualPercent}%</span></p>
-                <p className="text-[11px] text-muted mt-1">Extra <span className="font-bold" style={{ color: 'var(--amber)' }}>₹{waste.extraCostWeek}/wk</span></p>
-                <Link to="/insights" className="text-[11px] font-bold mt-2 inline-flex items-center gap-1" style={{ color: 'var(--amber)' }}>View <ChevronRight className="w-3 h-3" /></Link>
-              </div>
-              <div className="rounded-xl p-4 border" style={{ borderColor: 'rgba(52,211,153,0.3)', background: 'var(--green-soft)' }}>
-                <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--green)' }}><Sparkles className="w-3.5 h-3.5" /> Savings</p>
-                <p className="text-[22px] font-black leading-none mt-2" style={{ color: 'var(--green)' }}>₹{savings}<span className="text-[11px] font-bold text-muted">/mo</span></p>
-                <p className="text-[11px] text-muted">Unusual patterns</p>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-faint">04 · Widgets</p>
+                <p className="text-[13px] font-extrabold">Floors — circular</p>
               </div>
             </div>
-          </Widget>
-
-          <Widget id="usage" label="Today's curve" title="Whole-home watts — line" icon={Activity} pullout={
-            <>
-              <p className="text-[12px] text-muted">Line graph shows 24h watts. Hover for exact value. Full breakdown on Usage tab.</p>
-              <Link to="/usage" onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost w-full justify-center">Open Usage →</Link>
-            </>
-          }>
-            <HourlyLineGraph data={hours} />
-            <Link to="/usage" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Full breakdown <ChevronRight className="w-3.5 h-3.5" /></Link>
-          </Widget>
-
-          <div className="card p-4 flex flex-wrap items-center gap-2">
-            <span className="label mr-1">Quick actions</span>
-            <button onClick={() => setAll('on')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Play className="w-3 h-3" /> All on</button>
-            <button onClick={nightMode} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Moon className="w-3 h-3" /> Night</button>
-            <button onClick={() => setAll('off')} className="btn btn-ghost !px-3 !py-1.5 !text-[11px]"><Power className="w-3 h-3" /> All off</button>
+            <button onClick={()=>setWidgetDrawer(widgetDrawer==='floors'?null:'floors')} className="btn btn-ghost !p-2"><SlidersHorizontal className="w-4 h-4" /></button>
           </div>
+          <div className="p-5 xl:p-6 flex-1">
+            <FloorCircular />
+          </div>
+          {widgetDrawer==='floors' && (
+            <div className="absolute inset-0 z-10 flex">
+              <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setWidgetDrawer(null)} />
+              <div className="w-[78%] max-w-[320px] h-full overflow-auto p-4 shadow-2xl" style={{ background: 'var(--surface)', borderLeft:'1px solid var(--border)'}}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-extrabold text-[13px]">Floors — help</p>
+                  <button onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost !p-1.5"><X className="w-4 h-4"/></button>
+                </div>
+                <p className="text-[12px] text-muted leading-relaxed">Each ring = one floor, distinct colour (all 4 shown in every row). Center is tiny so all 4 rings stay visible. Use day chips or tap a ring. Full logbook in Logbook → Floors.</p>
+                <Link to="/logbook" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center mt-3">Open Logbook →</Link>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right column */}
-        <div className="xl:col-span-6 flex flex-col gap-4">
-          <Widget id="devices" label={`${onDevices.length} on · ${offDevices.length} off`} title="Devices" icon={Bolt} pullout={
-            <>
-              <p className="text-[12px] text-muted">Toggle any device. New devices can be added on Devices tab.</p>
-              <Link to="/devices" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center">Add device →</Link>
-            </>
-          }>
-            <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-              {devices.map(d => <DeviceRow key={d.id} d={d} />)}
-            </div>
-            <Link to="/devices" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Manage & identify devices <ChevronRight className="w-3.5 h-3.5" /></Link>
-          </Widget>
+        {/* 5 — Today's usage */}
+        <Widget id="usage" label="Today's curve" title="05 · Whole-home watts — line" icon={Activity} pullout={
+          <>
+            <p className="text-[12px] text-muted">Line graph shows 24h watts. Hover for exact value. Full breakdown on Usage tab.</p>
+            <Link to="/usage" onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost w-full justify-center">Open Usage →</Link>
+          </>
+        }>
+          <HourlyLineGraph data={hours} />
+          <Link to="/usage" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Full breakdown <ChevronRight className="w-3.5 h-3.5" /></Link>
+        </Widget>
 
-          <Widget id="rooms" label="Spaces" title="Rooms — tap to toggle" icon={Home} pullout={<p className="text-[12px] text-muted">Rooms are grouped under floors (Ground/First/Second/Terrace). Turning off a room shows ⚠️ warning with device list.</p>}>
-            <div className="grid grid-cols-2 gap-3">
-              {mockHome.rooms.map(r => {
-                const dvs = devices.filter(d => d.room === r.name);
-                const w = dvs.reduce((s, d) => s + d.currentWatts, 0);
-                const c = dvs.reduce((s, d) => s + d.monthCost, 0);
-                const roomOn = dvs.some(d => d.status === 'on');
-                return (
-                  <div key={r.id} className="rounded-xl p-4 border" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="flex items-center gap-2 text-[13px] font-bold truncate"><Home className="w-4 h-4 text-muted" />{r.name}</span>
-                      {dvs.length > 0 && <button onClick={() => requestToggleRoom(r.name)} className={`switch ${roomOn ? 'on' : ''} scale-90`} />}
-                    </div>
-                    <p className="text-[11px] font-mono" style={{ color: w > 0 ? 'var(--text)' : 'var(--text-faint)' }}>{w > 0 ? `${w} W` : 'idle'}</p>
-                    <p className="text-[11px] text-faint">₹{c.toLocaleString('en-IN')}/mo</p>
-                  </div>
-                );
-              })}
-            </div>
-          </Widget>
+        {/* 6 — Devices */}
+        <Widget id="devices" label={`${onDevices.length} on · ${offDevices.length} off`} title="06 · Devices" icon={Bolt} pullout={
+          <>
+            <p className="text-[12px] text-muted">Toggle any device. New devices can be added on Devices tab.</p>
+            <Link to="/devices" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center">Add device →</Link>
+          </>
+        }>
+          <div className="divide-y no-scrollbar pr-1" style={{ borderColor: 'var(--border)', maxHeight: 320, overflow: 'auto' }}>
+            {devices.map(d => <DeviceRow key={d.id} d={d} />)}
+          </div>
+          <Link to="/devices" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Manage & identify devices <ChevronRight className="w-3.5 h-3.5" /></Link>
+        </Widget>
 
-          <Widget id="hogs" label="Ranked by monthly cost" title="Highest consumers" icon={Zap} pullout={<Link to="/usage" onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost w-full justify-center">See full ranking →</Link>}>
-            {hogs.map((d, i) => {
-              const anom = anomalies.find(a => a.deviceId === d.id && a.kind === 'high');
+        {/* 7 — Rooms with ON/OFF for Utility & Guest — ordered */}
+        <Widget id="rooms" label="Spaces" title="07 · Rooms — tap to toggle" icon={Home} pullout={<p className="text-[12px] text-muted">Rooms are grouped under floors. Turning off a room shows ⚠️ warning. Utility & Guest now have explicit ON/OFF.</p>}>
+          <div className="grid grid-cols-2 gap-3">
+            {mockHome.rooms.map(r => {
+              const dvs = devices.filter(d => d.room === r.name);
+              const w = dvs.reduce((s, d) => s + d.currentWatts, 0);
+              const c = dvs.reduce((s, d) => s + d.monthCost, 0);
+              const roomOn = dvs.some(d => d.status === 'on');
+              const isUtilityOrGuest = r.name === 'Utility' || r.name === 'Guest Room';
               return (
-                <div key={d.id} className="flex items-center gap-3 py-2.5">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: i === 0 ? 'var(--amber-soft)' : 'var(--surface-2)' }}>
-                    {i === 0 ? <Bolt className="w-3.5 h-3.5 text-amber-400" /> : <Zap className="w-3.5 h-3.5 text-muted" />}
+                <div key={r.id} className="rounded-xl p-4 border flex flex-col" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="flex items-center gap-2 text-[13px] font-bold truncate"><Home className="w-4 h-4 text-muted" />{r.name}</span>
+                    {dvs.length > 0 && !isUtilityOrGuest && <button onClick={() => requestToggleRoom(r.name)} className={`switch ${roomOn ? 'on' : ''} scale-90`} />}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold truncate">{d.name}</p>
-                    {anom && <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><AlertTriangle className="w-3 h-3" /> {anom.aboveUsualPercent}% above usual</p>}
-                  </div>
-                  <div className="w-24 h-1.5 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-2)' }}><div className="h-full rounded-full" style={{ width: `${Math.max(8, (d.monthCost / maxHog) * 100)}%`, background: i === 0 ? 'var(--amber)' : 'var(--accent)' }} /></div>
-                  <p className="text-[13px] font-bold w-[86px] text-right shrink-0" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text)' }}>₹{d.monthCost.toLocaleString('en-IN')}</p>
+                  <p className="text-[11px] font-mono" style={{ color: w > 0 ? 'var(--text)' : 'var(--text-faint)' }}>{w > 0 ? `${w} W` : 'idle'}</p>
+                  <p className="text-[11px] text-faint">₹{c.toLocaleString('en-IN')}/mo · {dvs.length} device{dvs.length!==1?'s':''}</p>
+                  {isUtilityOrGuest && (
+                    <div className="flex gap-1.5 mt-3">
+                      <button onClick={() => setRoomState(r.name, true)} className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-extrabold border ${roomOn ? 'text-white' : 'text-muted'}`} style={{ background: roomOn ? 'var(--accent)' : 'var(--surface)', borderColor: roomOn ? 'var(--accent)' : 'var(--border)' }}>ON</button>
+                      <button onClick={() => setRoomState(r.name, false)} className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-extrabold border ${!roomOn ? 'text-white' : 'text-muted'}`} style={{ background: !roomOn ? '#0EA5E9' : 'var(--surface)', borderColor: !roomOn ? '#0EA5E9' : 'var(--border)', opacity: dvs.length===0 ? 0.6 : 1 }}>OFF</button>
+                    </div>
+                  )}
+                  {dvs.length===0 && <p className="text-[10px] text-faint mt-2">No devices — ON/OFF reserved</p>}
                 </div>
               );
             })}
-          </Widget>
-        </div>
+          </div>
+        </Widget>
+
+        {/* 8 — Hogs */}
+        <Widget id="hogs" label="Ranked by monthly cost" title="08 · Highest consumers" icon={Zap} pullout={<Link to="/usage" onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost w-full justify-center">See full ranking →</Link>}>
+          {hogs.map((d, i) => {
+            const anom = anomalies.find(a => a.deviceId === d.id && a.kind === 'high');
+            return (
+              <div key={d.id} className="flex items-center gap-3 py-2.5">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: i === 0 ? 'var(--amber-soft)' : 'var(--surface-2)' }}>
+                  {i === 0 ? <Bolt className="w-3.5 h-3.5 text-amber-400" /> : <Zap className="w-3.5 h-3.5 text-muted" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold truncate">{d.name}</p>
+                  {anom && <p className="text-[11px] font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><AlertTriangle className="w-3 h-3" /> {anom.aboveUsualPercent}% above usual</p>}
+                </div>
+                <div className="w-24 h-1.5 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--surface-2)' }}><div className="h-full rounded-full" style={{ width: `${Math.max(8, (d.monthCost / maxHog) * 100)}%`, background: i === 0 ? 'var(--amber)' : 'var(--accent)' }} /></div>
+                <p className="text-[13px] font-bold w-[86px] text-right shrink-0" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text)' }}>₹{d.monthCost.toLocaleString('en-IN')}</p>
+              </div>
+            );
+          })}
+        </Widget>
       </div>
 
       {/* Room off warning */}

@@ -126,6 +126,13 @@ export default function Logbook() {
                   </div>
                   <button onClick={()=>setDetail({type:'floor', id: floor.id})} className="btn btn-ghost !px-2.5 !py-1.5 !text-[11px]"><Layers className="w-3.5 h-3.5"/> Pullout <ChevronRight className="w-3 h-3"/></button>
                 </div>
+                <div className="flex items-center gap-1 mt-2">
+                  {FLOORS.map(f=>(
+                    <span key={f.id} className="w-2.5 h-2.5 rounded-full border" style={{ background: f.color, borderColor: f.id===floor.id ? 'var(--text)' : 'rgba(255,255,255,0.18)', opacity: f.id===floor.id ? 1 : 0.92, transform: f.id===floor.id ? 'scale(1.25)' : 'scale(1)' }} title={f.name} />
+                  ))}
+                  <span className="text-[10px] font-bold ml-1.5" style={{ color: floor.color }}>● {floor.name} + 3</span>
+                  <span className="text-[10px] text-faint ml-1">4 colours</span>
+                </div>
                 <div className="mt-3"><Sparkline data={kwh14.length?kwh14:[0,0]} color={floor.color}/></div>
                 <div className="flex gap-2 mt-3">
                   <span className="chip" style={{background:floor.soft, color:floor.color}}>{totalKwh.toFixed(1)} kWh</span>
@@ -241,10 +248,11 @@ export default function Logbook() {
                     {detail.type==='room' && <><Home className="w-3 h-3"/> Room</>}
                     {detail.type==='device' && <><Cpu className="w-3 h-3"/> Device</>}
                   </p>
-                  <h3 className="text-[16px] font-extrabold mt-1">
+                  <h3 className="text-[16px] font-extrabold mt-1 flex items-center gap-2">
                     {detail.type==='floor' ? FLOORS.find(f=>f.id===detail.id)?.name : detail.id}
+                    {detail.type==='floor' && <span className="flex items-center gap-1 ml-1">{FLOORS.map(f=>(<span key={f.id} className="w-2 h-2 rounded-full border" style={{ background: f.color, borderColor: f.id===detail.id ? 'var(--text)' : 'transparent', opacity: f.id===detail.id ? 1 : 0.35 }} title={f.name} />))}</span>}
                   </h3>
-                  <p className="text-[11px] text-faint mt-1">{detailData.devs.length} devices · {detailData.logs.length} records · from registration to today</p>
+                  <p className="text-[11px] text-faint mt-1">{detailData.devs.length} devices · {detailData.logs.length} records · from registration to today {detail.type==='floor' && '· 4 colours shown'}</p>
                 </div>
                 <button onClick={()=>setDetail(null)} className="btn btn-ghost !p-2 shrink-0"><X className="w-4 h-4"/></button>
               </div>
