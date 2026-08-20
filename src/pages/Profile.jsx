@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Mail, Phone, MapPin, BadgeCheck, Shield, LogOut, Edit3, Save, X, Home, Hash, Calendar, Zap, KeyRound, Smartphone } from 'lucide-react';
+import { Mail, Phone, MapPin, BadgeCheck, Shield, LogOut, Edit3, Save, X, Home, Hash, Calendar, Zap, KeyRound, Smartphone, Sun, Moon } from 'lucide-react';
 import { mockUser, mockHome } from '../data/mockData.js';
 
 export default function Profile() {
-  const { pro } = useOutletContext();
+  const { pro, theme, setTheme } = useOutletContext();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: mockUser.name,
@@ -101,6 +101,34 @@ export default function Profile() {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Appearance — Background black / white */}
+      <div className="card p-5 mb-4">
+        <p className="label mb-4">Appearance — Background</p>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => setTheme('dark')}
+            className={`rounded-xl p-3 flex flex-col items-center gap-2 border-2 transition ${theme === 'dark' ? 'border-[var(--accent)]' : 'border-transparent'}`}
+            style={{ background: theme === 'dark' ? 'var(--accent-soft)' : 'var(--surface-2)' }}
+          >
+            <span className="w-12 h-12 rounded-xl border flex items-center justify-center" style={{ background: '#141416', borderColor: 'rgba(255,255,255,0.12)' }}><Moon className="w-5 h-5 text-white" /></span>
+            <span className="text-[13px] font-bold">Black</span>
+            <span className="text-[11px] text-faint">Dark · OLED</span>
+            {theme === 'dark' && <span className="chip mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>Active</span>}
+          </button>
+          <button
+            onClick={() => setTheme('light')}
+            className={`rounded-xl p-3 flex flex-col items-center gap-2 border-2 transition ${theme === 'light' ? 'border-[var(--accent)]' : 'border-transparent'}`}
+            style={{ background: theme === 'light' ? 'var(--accent-soft)' : 'var(--surface-2)' }}
+          >
+            <span className="w-12 h-12 rounded-xl border flex items-center justify-center" style={{ background: '#FFFFFF', borderColor: '#E7E7EA' }}><Sun className="w-5 h-5 text-zinc-700" /></span>
+            <span className="text-[13px] font-bold">White</span>
+            <span className="text-[11px] text-faint">Light · Day</span>
+            {theme === 'light' && <span className="chip mt-1" style={{ background: 'var(--accent)', color: '#fff' }}>Active</span>}
+          </button>
+        </div>
+        <p className="text-[11px] text-faint mt-3 leading-relaxed">Toggles the whole app background — same as the header <span className="font-bold text-muted">Sun/Moon</span> button. Saved in this browser.</p>
       </div>
 
       {/* Other account details */}
