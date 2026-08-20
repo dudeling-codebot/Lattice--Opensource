@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
@@ -12,15 +12,33 @@ const navItems = [
   { to: '/logbook', label: 'Logbook', icon: BookOpen },
 ];
 
+const groups = [
+  { title: 'Overview', items: ['/', '/usage', '/insights', '/logbook'] },
+  { title: 'Devices', items: ['/connect', '/devices'] },
+  { title: 'Account', items: ['/profile'] },
+];
+
 export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowClass }) {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -33,6 +51,15 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
           }}
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
+            <button
+              onClick={() => setOpen(o => !o)}
+              className="btn btn-ghost !px-2.5 !py-2"
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+            >
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
             <button onClick={() => navigate('/')} className="flex items-center gap-2.5 shrink-0">
               <img
                 src="/brand/logo.png"
@@ -46,16 +73,7 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
               </div>
             </button>
 
-            <nav className="hidden md:flex items-center gap-1 flex-1 justify-center overflow-x-auto">
-              {navItems.map(it => (
-                <NavLink key={it.to} to={it.to} end={it.end} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} shrink-0`}>
-                  <it.icon className="w-4 h-4" />
-                  {it.label}
-                </NavLink>
-              ))}
-            </nav>
-
-            <div className="flex-1 md:hidden" />
+            <div className="flex-1" />
 
             <div className="flex items-center gap-1.5">
               <button
@@ -78,23 +96,71 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
         </header>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-24 md:pb-12">
-        <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass }} />
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-40 transition ${open ? 'visible' : 'invisible'}`}
+        aria-hidden={!open}
+      >
+        <div
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setOpen(false)}
+        />
       </div>
 
-      <nav className="md:hidden fixed bottom-4 left-1 right-1 z-50 card !rounded-2xl px-1 py-1.5 flex gap-0.5 overflow-x-auto scrollbar-none justify-between">
-        {navItems.map(it => (
-          <NavLink
-            key={it.to}
-            to={it.to}
-            end={it.end}
-            className={({ isActive }) => `flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-[9px] font-bold transition-all shrink-0 ${isActive ? 'nav-item active' : 'nav-item'}`}
-          >
-            <it.icon className="w-4 h-4" />
-            {it.label}
-          </NavLink>
-        ))}
-      </nav>
+      {/* Side pullout */}
+      <aside
+        className={`fixed top-0 left-0 z-50 h-full w-[300px] max-w-[82vw] flex flex-col transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}
+        aria-label="Navigation"
+      >
+        <div className="h-16 flex items-center gap-2.5 px-4 shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+          <img src="/brand/logo.png" alt="LATTICE logo" className="w-8 h-8 rounded-[9px] object-cover" />
+          <div>
+            <p className="text-[14px] font-extrabold leading-none">LATTICE</p>
+            <p className="text-[10px] text-faint uppercase tracking-[0.14em]">Smart Energy</p>
+          </div>
+          <button onClick={() => setOpen(false)} className="ml-auto btn btn-ghost !p-2" aria-label="Close"><X className="w-4 h-4" /></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+          {groups.map(g => (
+            <div key={g.title}>
+              <p className="label !text-[10px] px-2 mb-2">{g.title}</p>
+              <div className="space-y-1">
+                {g.items.map(to => {
+                  const it = navItems.find(n => n.to === to);
+                  if (!it) return null;
+                  return (
+                    <NavLink
+                      key={it.to}
+                      to={it.to}
+                      end={it.end}
+                      onClick={() => setOpen(false)}
+                      className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition ${isActive ? 'text-white' : 'text-muted hover:text-[var(--text)] hover:bg-[var(--surface-2)]'}`}
+                      style={({ isActive }) => isActive ? { background: 'var(--accent)', color: '#fff' } : undefined}
+                    >
+                      <it.icon className="w-4 h-4 shrink-0" />
+                      {it.label}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-4 shrink-0 space-y-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="rounded-xl px-3 py-3 flex items-center justify-between" style={{ background: 'var(--surface-2)' }}>
+            <span className="text-[12px] font-bold flex items-center gap-2">{theme === 'dark' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />} {theme === 'dark' ? 'Dark' : 'Light'}</span>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="btn btn-ghost !px-2.5 !py-1 !text-[11px]">{theme === 'dark' ? 'White' : 'Black'}</button>
+          </div>
+          <p className="text-[11px] text-faint leading-relaxed">Pullout navigation — organised by section. Tap outside or press Esc to close.</p>
+        </div>
+      </aside>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12">
+        <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass }} />
+      </div>
     </div>
   );
 }
