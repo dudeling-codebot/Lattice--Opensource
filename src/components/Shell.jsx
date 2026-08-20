@@ -50,7 +50,7 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
             borderBottom: '1px solid var(--border)',
           }}
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
+          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
             <button
               onClick={() => setOpen(o => !o)}
               className="btn btn-ghost !px-2.5 !py-2"
@@ -158,7 +158,7 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
         </div>
       </aside>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-20 pb-12">
         <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass }} />
       </div>
     </div>

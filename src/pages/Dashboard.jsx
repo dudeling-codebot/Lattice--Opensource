@@ -91,10 +91,40 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      {/* Natural grid — no forced viewport height, no inner scrollbars. Page scrolls normally. */}
+      {/* Natural grid — items fill available width, no inner scrollbars. Page scrolls normally. */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+
+        {/* Floors — full-width hero, one distinct circle per floor */}
+        <div className="xl:col-span-12">
+          <div className="card relative overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-faint">Widgets</p>
+                <p className="text-[13px] font-extrabold">Floors — energy by floor</p>
+              </div>
+              <button onClick={()=>setWidgetDrawer(widgetDrawer==='floors'?null:'floors')} className="btn btn-ghost !p-2"><SlidersHorizontal className="w-4 h-4" /></button>
+            </div>
+            <div className="p-5">
+              <FloorCircular />
+            </div>
+            {widgetDrawer==='floors' && (
+              <div className="absolute inset-0 z-10 flex">
+                <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setWidgetDrawer(null)} />
+                <div className="w-[78%] max-w-[320px] h-full overflow-auto p-4 shadow-2xl" style={{ background: 'var(--surface)', borderLeft:'1px solid var(--border)'}}>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-extrabold text-[13px]">Floors — help</p>
+                    <button onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost !p-1.5"><X className="w-4 h-4"/></button>
+                  </div>
+                  <p className="text-[12px] text-muted leading-relaxed">One circle per floor, each with its own colour. The arc shows that floor's share of the day's total — tap a circle to focus, use the day chips to step through the week. Full floor logbook is in Logbook → Floors.</p>
+                  <Link to="/logbook" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center mt-3">Open Logbook →</Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Left column */}
-        <div className="xl:col-span-5 flex flex-col gap-4">
+        <div className="xl:col-span-6 flex flex-col gap-4">
           <Widget
             id="spend"
             label={`${mockHome.name} · Home Assistant`}
@@ -159,33 +189,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right column */}
-        <div className="xl:col-span-7 flex flex-col gap-4">
-          <div className="card relative overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-              <div>
-                <p className="text-[10px] font-bold tracking-widest uppercase text-faint">Widgets</p>
-                <p className="text-[13px] font-extrabold">Floors — circular</p>
-              </div>
-              <button onClick={()=>setWidgetDrawer(widgetDrawer==='floors'?null:'floors')} className="btn btn-ghost !p-2"><SlidersHorizontal className="w-4 h-4" /></button>
-            </div>
-            <div className="p-0">
-              <FloorCircular />
-            </div>
-            {widgetDrawer==='floors' && (
-              <div className="absolute inset-0 z-10 flex">
-                <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={()=>setWidgetDrawer(null)} />
-                <div className="w-[78%] max-w-[320px] h-full overflow-auto p-4 shadow-2xl" style={{ background: 'var(--surface)', borderLeft:'1px solid var(--border)'}}>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-extrabold text-[13px]">Floors — help</p>
-                    <button onClick={()=>setWidgetDrawer(null)} className="btn btn-ghost !p-1.5"><X className="w-4 h-4"/></button>
-                  </div>
-                  <p className="text-[12px] text-muted leading-relaxed">Each ring = one floor, distinct colour. Center is high-contrast for readability. Use the day chips or tap a ring. Full floor logbook is in Logbook → Floors.</p>
-                  <Link to="/logbook" onClick={()=>setWidgetDrawer(null)} className="btn btn-primary w-full justify-center mt-3">Open Logbook →</Link>
-                </div>
-              </div>
-            )}
-          </div>
-
+        <div className="xl:col-span-6 flex flex-col gap-4">
           <Widget id="devices" label={`${onDevices.length} on · ${offDevices.length} off`} title="Devices" icon={Bolt} pullout={
             <>
               <p className="text-[12px] text-muted">Toggle any device. New devices can be added on Devices tab.</p>
