@@ -3,6 +3,7 @@ import { BadgeCheck, Cpu, Pencil, Clock, IndianRupee, Zap, ArrowLeft } from 'luc
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile } from '../data/mockData.js';
 import { useState } from 'react';
+import HourlyLineGraph from '../components/HourlyLineGraph.jsx';
 
 export default function DeviceDetail() {
   const { id } = useParams();
@@ -22,7 +23,6 @@ export default function DeviceDetail() {
   }
 
   const hours = dailyProfile(device, device.id.charCodeAt(1) % 40);
-  const maxW = Math.max(...hours.map(h => h.watts), 1);
   const todayUsed = hours.reduce((s, h) => s + h.watts, 0);
   const on = device.status === 'on';
 
@@ -109,19 +109,7 @@ export default function DeviceDetail() {
             <Clock className="w-3.5 h-3.5" /> 24h
           </span>
         </div>
-        <div className="flex items-end gap-[3px] h-28">
-          {hours.map(h => (
-            <div
-              key={h.hour}
-              className={`bar flex-1 ${h.watts > 0 ? '' : 'off'}`}
-              style={{ height: `${Math.max(5, (h.watts / maxW) * 100)}%` }}
-              title={`${h.hour}:00 — ${h.watts} W`}
-            />
-          ))}
-        </div>
-        <div className="flex justify-between text-[9px] text-faint mt-2 font-mono">
-          <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
-        </div>
+        <HourlyLineGraph data={hours} height={128} />
       </div>
 
       <div className="card p-5">

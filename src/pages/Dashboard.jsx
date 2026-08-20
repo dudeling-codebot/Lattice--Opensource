@@ -1,11 +1,26 @@
 import { useOutletContext, Link } from 'react-router-dom';
 import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
+import FloorCircular from '../components/FloorCircular.jsx';
+import HourlyLineGraph from '../components/HourlyLineGraph.jsx';
 
 export default function Dashboard() {
   const { pro } = useOutletContext();
   const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, totalWatts, totalToday, totalMonth } = useEnergy();
+  const [pendingRoom, setPendingRoom] = useState(null);
+
+  const requestToggleRoom = (roomName) => {
+    const dvs = devices.filter(d => d.room === roomName);
+    const anyOn = dvs.some(d => d.status === 'on');
+    if (anyOn) {
+      const willOff = dvs.filter(d => d.status === 'on');
+      setPendingRoom({ name: roomName, devices: willOff });
+    } else {
+      toggleRoom(roomName);
+    }
+  };
 
   const onDevices = devices.filter(d => d.status === 'on');
   const offDevices = devices.filter(d => d.status !== 'on');
@@ -13,7 +28,6 @@ export default function Dashboard() {
     hour: i,
     watts: devices.reduce((s, d) => s + (dailyProfile(d, i * 7)[i]?.watts ?? 0), 0),
   }));
-  const maxW = Math.max(...hours.map(h => h.watts), 1);
   const hogs = [...devices].filter(d => d.monthCost > 0).sort((a, b) => b.monthCost - a.monthCost).slice(0, 3);
   const delta = totalToday - mockHome.yesterdayTotal;
   const waste = anomalies.find(a => a.deviceId && a.kind === 'high');
@@ -119,22 +133,15 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Today's curve */}
+      {/* Floor-wise circular view — day wise */}
+      <div className="mb-4">
+        <FloorCircular />
+      </div>
+
+      {/* Today's curve — line graph */}
       <div className="card p-5 mb-4">
-        <p className="label mb-2">Today's usage — whole home (watts)</p>
-        <div className="flex items-end gap-[3px] h-16">
-          {hours.map(h => (
-            <div
-              key={h.hour}
-              className={`bar flex-1 ${h.watts > 0 ? '' : 'off'}`}
-              style={{ height: `${Math.max(5, (h.watts / maxW) * 100)}%` }}
-              title={`${h.hour}:00 — ${h.watts} W`}
-            />
-          ))}
-        </div>
-        <div className="flex justify-between text-[9px] text-faint mt-1.5 font-mono">
-          <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:00</span>
-        </div>
+        <p className="label mb-3">Today's usage — whole home (watts)</p>
+        <HourlyLineGraph data={hours} />
         <Link to="/usage" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>
           Full usage breakdown <ChevronRight className="w-3.5 h-3.5" />
         </Link>
@@ -172,7 +179,7 @@ export default function Dashboard() {
                 </div>
                 {dvs.length > 0 && (
                   <button
-                    onClick={() => toggleRoom(r.name)}
+                    onClick={() => requestToggleRoom(r.name)}
                     className={`switch ${roomOn ? 'on' : ''} scale-90`}
                     title={roomOn ? 'Switch off room' : 'Switch on room'}
                   />
@@ -219,6 +226,46 @@ export default function Dashboard() {
           );
         })}
       </div>
+
+      {/* ⚠️ Room off warning modal */}
+      {pendingRoom && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setPendingRoom(null)} />
+          <div className="relative card p-6 w-full max-w-md shadow-2xl" style={{ borderColor: 'rgba(251,191,36,0.5)' }}>
+            <div className="flex items-start gap-3 mb-4">
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xl" style={{ background: 'var(--amber-soft)' }}>⚠️</span>
+              <div>
+                <h3 className="text-[16px] font-extrabold leading-tight">⚠️ Warning — Turn off {pendingRoom.name}? 🚨</h3>
+                <p className="text-[12px] text-muted mt-1 leading-relaxed">You are about to turn OFF the entire room. The following device{pendingRoom.devices.length > 1 ? 's' : ''} will be turned off:</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl p-3 mb-4 space-y-2" style={{ background: 'var(--amber-soft)', border: '1px solid rgba(251,191,36,0.25)' }}>
+              {pendingRoom.devices.map(d => (
+                <p key={d.id} className="text-[13px] font-semibold flex items-center gap-2">
+                  <span>⚠️</span> {d.name} <span className="text-[11px] font-mono text-muted">({d.currentWatts} W)</span> <span>🔌</span>
+                </p>
+              ))}
+              <p className="text-[11px] font-bold mt-2 flex items-center gap-1" style={{ color: 'var(--amber)' }}>⚡ All listed devices will lose power! ⚡</p>
+            </div>
+
+            <p className="text-[11px] text-faint mb-4 flex items-center gap-1.5">💡 Tip: You can turn them back on individually from Devices.</p>
+
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setPendingRoom(null)} className="btn btn-ghost !px-4 !py-2">
+                Cancel
+              </button>
+              <button
+                onClick={() => { toggleRoom(pendingRoom.name); setPendingRoom(null); }}
+                className="btn btn-primary !px-5 !py-2"
+                style={{ background: '#F59E0B', color: '#fff' }}
+              >
+                ⚠️ Yes, turn off
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

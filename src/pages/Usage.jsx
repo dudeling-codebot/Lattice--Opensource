@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, WEEKDAYS, weekTotals } from '../data/mockData.js';
+import FloorCircular from '../components/FloorCircular.jsx';
 
 export default function Usage() {
   const { devices, totalMonth } = useEnergy();
@@ -77,6 +78,11 @@ export default function Usage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Floor circular — day wise */}
+      <div className="mb-4">
+        <FloorCircular />
       </div>
 
       {/* Rooms breakdown */}

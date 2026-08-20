@@ -87,6 +87,29 @@ export function EnergyProvider({ children }) {
     );
   };
 
+  const addDevice = ({ name, room, baseWatts }) => {
+    const id = `d${Date.now().toString(36)}`;
+    const watts = Math.max(5, Number(baseWatts) || 100);
+    const monthCost = Math.max(20, Math.round(watts * 1.15));
+    const todayCost = Math.round(monthCost / 30);
+    const newDev = {
+      id,
+      name: name.trim(),
+      room,
+      baseWatts: watts,
+      monthCost,
+      todayCost,
+      status: 'on',
+      identified: true,
+      verified: true,
+      registeredAt: new Date().toISOString().slice(0, 10),
+      currentWatts: Math.round(watts * 0.55),
+    };
+    targetsRef.current[id] = watts * 0.55;
+    setDevices(prev => [...prev, newDev]);
+    return newDev;
+  };
+
   const totalWatts = devices.reduce((s, d) => s + d.currentWatts, 0);
   const totalToday = devices.reduce((s, d) => s + d.todayCost, 0);
   const totalMonth = devices.reduce((s, d) => s + d.monthCost, 0);
@@ -101,6 +124,7 @@ export function EnergyProvider({ children }) {
         toggleRoom,
         setAll,
         nightMode,
+        addDevice,
         totalWatts,
         totalToday,
         totalMonth,

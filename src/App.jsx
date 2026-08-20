@@ -8,6 +8,8 @@ import Connect from './pages/Connect.jsx';
 import Devices from './pages/Devices.jsx';
 import DeviceDetail from './pages/DeviceDetail.jsx';
 import Insights from './pages/Insights.jsx';
+import Profile from './pages/Profile.jsx';
+import Logbook from './pages/Logbook.jsx';
 import { EnergyProvider } from './context/EnergyContext.jsx';
 
 export default function App() {
@@ -53,6 +55,8 @@ export default function App() {
             <Route path="/devices" element={<Devices />} />
             <Route path="/device/:id" element={<DeviceDetail />} />
             <Route path="/insights" element={<Insights />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/logbook" element={<Logbook />} />
           </Route>
           <Route path="*" element={<Navigate to={started ? '/' : '/welcome'} replace />} />
         </Routes>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, CheckCircle2, Search, Pencil, RefreshCw, Cpu, Zap, Snowflake, Tv, Fan, ChevronRight } from 'lucide-react';
+import { Sparkles, CheckCircle2, Search, Pencil, RefreshCw, Cpu, Zap, Snowflake, Tv, Fan, ChevronRight, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { mockHome } from '../data/mockData.js';
 import { useEnergy } from '../context/EnergyContext.jsx';
@@ -18,7 +18,27 @@ export default function Devices() {
   const [searchingId, setSearchingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
-  const { toggleDevice } = useEnergy();
+  const { toggleDevice, addDevice } = useEnergy();
+  const [showAdd, setShowAdd] = useState(false);
+  const [addForm, setAddForm] = useState({ name: '', room: mockHome.rooms[0]?.name || 'Living Room', watts: '' });
+  const [addError, setAddError] = useState('');
+
+  const handleAddDevice = () => {
+    if (!addForm.name.trim()) { setAddError('Device name is required'); return; }
+    const watts = Number(addForm.watts);
+    if (!watts || watts < 5) { setAddError('Enter power (W) — e.g. 120'); return; }
+    const newDev = addDevice({ name: addForm.name, room: addForm.room, baseWatts: watts });
+    // keep local Devices page in sync so it shows in verified list
+    setDevices(prev => [...prev, newDev]);
+    setAddForm({ name: '', room: mockHome.rooms[0]?.name || 'Living Room', watts: '' });
+    setAddError('');
+    setShowAdd(false);
+  };
+
+  const handleToggleVerified = (id) => {
+    toggleDevice(id);
+    setDevices(prev => prev.map(d => d.id === id ? { ...d, status: d.status === 'on' ? 'off' : 'on' } : d));
+  };
 
   const unknown = devices.filter(d => !d.identified);
   const guesses = devices.filter(d => d.identified && !d.verified);
@@ -83,9 +103,8 @@ export default function Devices() {
 
       {action === 'verified' ? (
         <button
-          onClick={() => toggleDevice(d.id)}
-          className="switch"
-          style={{ background: d.status === 'on' ? 'var(--accent)' : '', borderColor: d.status === 'on' ? 'var(--accent)' : '' }}
+          onClick={() => handleToggleVerified(d.id)}
+          className={`switch ${d.status === 'on' ? 'on' : ''}`}
           title="Toggle"
         />
       ) : (
@@ -114,9 +133,14 @@ export default function Devices() {
             AI studies usage patterns, verifies specs online — you have the final say.
           </p>
         </div>
-        <button className="btn btn-ghost !px-3 !py-2 shrink-0" title="Re-scan">
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={() => setShowAdd(true)} className="btn btn-primary !px-3.5 !py-2">
+            <Plus className="w-4 h-4" /> Add device
+          </button>
+          <button className="btn btn-ghost !px-3 !py-2" title="Re-scan">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {unknown.length > 0 && (
@@ -168,7 +192,63 @@ export default function Devices() {
         {verified.map(d => (
           <Row key={d.id} d={d} action="verified" />
         ))}
+        {verified.length === 0 && <p className="text-[12px] text-faint py-3 text-center">No verified devices yet — add one above.</p>}
       </div>
+
+      {/* Add device modal */}
+      {showAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAdd(false)} />
+          <div className="relative card p-5 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[16px] font-extrabold flex items-center gap-2"><Plus className="w-4 h-4" style={{ color: 'var(--accent)' }} /> Add another device</h3>
+              <button onClick={() => setShowAdd(false)} className="btn btn-ghost !p-2"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-[11px] font-bold text-faint mb-1.5 block">Device name</label>
+                <input
+                  value={addForm.name}
+                  onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g. Bedroom Heater"
+                  className="input w-full text-[13px]"
+                  autoFocus
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold text-faint mb-1.5 block">Room</label>
+                  <select
+                    value={addForm.room}
+                    onChange={e => setAddForm(f => ({ ...f, room: e.target.value }))}
+                    className="input w-full text-[13px]"
+                  >
+                    {mockHome.rooms.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold text-faint mb-1.5 block">Power (W)</label>
+                  <input
+                    value={addForm.watts}
+                    onChange={e => setAddForm(f => ({ ...f, watts: e.target.value }))}
+                    placeholder="e.g. 1500"
+                    type="number"
+                    min="5"
+                    className="input w-full text-[13px] font-mono"
+                  />
+                </div>
+              </div>
+              {addError && <p className="text-[12px] font-semibold" style={{ color: 'var(--accent)' }}>{addError}</p>}
+              <p className="text-[11px] text-faint leading-relaxed">It will appear as <span className="font-bold text-muted">AI verified</span> and show in Dashboard, Usage and Rooms instantly.</p>
+              <div className="flex justify-end gap-2 pt-1">
+                <button onClick={() => setShowAdd(false)} className="btn btn-ghost !px-4 !py-2">Cancel</button>
+                <button onClick={handleAddDevice} className="btn btn-primary !px-5 !py-2"><Plus className="w-4 h-4" /> Add device</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

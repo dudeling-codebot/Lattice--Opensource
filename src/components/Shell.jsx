@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown } from 'lucide-react';
+import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
@@ -8,6 +8,8 @@ const navItems = [
   { to: '/connect', label: 'Connect', icon: Plug },
   { to: '/devices', label: 'Devices', icon: Cpu },
   { to: '/insights', label: 'Insights', icon: BarChart3 },
+  { to: '/profile', label: 'Profile', icon: User },
+  { to: '/logbook', label: 'Logbook', icon: BookOpen },
 ];
 
 export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowClass }) {
@@ -44,9 +46,9 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
               </div>
             </button>
 
-            <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            <nav className="hidden md:flex items-center gap-1 flex-1 justify-center overflow-x-auto">
               {navItems.map(it => (
-                <NavLink key={it.to} to={it.to} end={it.end} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink key={it.to} to={it.to} end={it.end} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} shrink-0`}>
                   <it.icon className="w-4 h-4" />
                   {it.label}
                 </NavLink>
@@ -80,15 +82,15 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
         <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass }} />
       </div>
 
-      <nav className="md:hidden fixed bottom-4 left-4 right-4 z-50 card !rounded-2xl px-2 py-1.5 flex justify-around">
+      <nav className="md:hidden fixed bottom-4 left-1 right-1 z-50 card !rounded-2xl px-1 py-1.5 flex gap-0.5 overflow-x-auto scrollbar-none justify-between">
         {navItems.map(it => (
           <NavLink
             key={it.to}
             to={it.to}
             end={it.end}
-            className={({ isActive }) => `flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-bold transition-all ${isActive ? 'nav-item active' : 'nav-item'}`}
+            className={({ isActive }) => `flex flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-[9px] font-bold transition-all shrink-0 ${isActive ? 'nav-item active' : 'nav-item'}`}
           >
-            <it.icon className="w-5 h-5" />
+            <it.icon className="w-4 h-4" />
             {it.label}
           </NavLink>
         ))}

@@ -22,6 +22,7 @@ export const mockHome = {
       status: "on",
       identified: true,
       verified: true,
+      registeredAt: "2024-03-12",
     },
     {
       id: "d2",
@@ -33,6 +34,7 @@ export const mockHome = {
       status: "on",
       identified: true,
       verified: true,
+      registeredAt: "2024-04-08",
     },
     {
       id: "d3",
@@ -44,6 +46,7 @@ export const mockHome = {
       status: "on",
       identified: true,
       verified: false,
+      registeredAt: "2024-05-20",
     },
     {
       id: "d4",
@@ -55,6 +58,7 @@ export const mockHome = {
       status: "on",
       identified: true,
       verified: true,
+      registeredAt: "2024-03-01",
     },
     {
       id: "d5",
@@ -66,6 +70,7 @@ export const mockHome = {
       status: "paused",
       identified: true,
       verified: true,
+      registeredAt: "2024-06-14",
     },
     {
       id: "d6",
@@ -78,8 +83,59 @@ export const mockHome = {
       identified: false,
       verified: false,
       pattern: "short bursts, mornings + evenings — could be a toaster, mixer or water heater",
+      registeredAt: "2024-07-02",
     },
   ],
+};
+
+export const FLOORS = [
+  { id: 'ground', name: 'Ground Floor', color: '#E11D48', soft: 'rgba(225,29,72,0.14)', rooms: ['Living Room', 'Kitchen'] },
+  { id: 'first', name: 'First Floor', color: '#0EA5E9', soft: 'rgba(14,165,233,0.14)', rooms: ['Master Bedroom'] },
+  { id: 'second', name: 'Second Floor', color: '#F59E0B', soft: 'rgba(245,158,11,0.14)', rooms: ['Guest Room'] },
+  { id: 'terrace', name: 'Terrace / Utility', color: '#10B981', soft: 'rgba(16,185,129,0.14)', rooms: [] },
+];
+
+export const FLOOR_DAILY_RECORDS = (() => {
+  // day-wise kWh per floor for last 7 days
+  const base = { ground: 9.2, first: 3.8, second: 1.6, terrace: 2.1 };
+  const variance = { ground: 3.5, first: 1.8, second: 1.2, terrace: 1.4 };
+  const tariff = 8.0;
+  const today = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const iso = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('en-IN', { weekday: 'short' });
+    const dateLabel = d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+    const floors = {};
+    let totalKwh = 0;
+    FLOORS.forEach(f => {
+      // deterministic pseudo-random per day+flooor
+      const seed = (d.getDate() * 17 + f.id.charCodeAt(0) * 13) % 100;
+      const wav = Math.sin((6 - i) * 0.9 + f.id.length) * 0.5 + Math.sin(seed * 0.21) * 0.5;
+      const kwh = Math.max(0.6, base[f.id] + wav * variance[f.id] + (seed % 7) * 0.12);
+      const rounded = Math.round(kwh * 10) / 10;
+      floors[f.id] = { kwh: rounded, cost: Math.round(rounded * tariff) };
+      totalKwh += rounded;
+    });
+    // add small rounding to keep total consistent
+    totalKwh = Math.round(totalKwh * 10) / 10;
+    days.push({ iso, label, dateLabel, floors, totalKwh, totalCost: Math.round(totalKwh * tariff) });
+  }
+  return days;
+})();
+
+export const mockUser = {
+  name: 'Guruprasad K.',
+  gmail: 'guruprasad.lattice@gmail.com',
+  phone: '+91 98XXX X3210',
+  avatar: 'GK',
+  accountId: 'LT-2024-8841',
+  memberSince: 'March 2024',
+  address: 'Guruprasad Residence, Pune, Maharashtra 411001',
+  plan: 'Free',
+  verifiedGmail: true,
 };
 
 export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -137,4 +193,33 @@ export function potentialSavings() {
     .filter(a => a.kind === 'high')
     .reduce((s, a) => s + a.extraCostWeek, 0);
   return Math.round((weekly * 52) / 12);
+}
+
+export function getLogbook(device, days = 60) {
+  const tariff = mockHome.tariff;
+  const reg = new Date(device.registeredAt || '2024-04-01');
+  const today = new Date();
+  const logs = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    if (d < reg) continue;
+    const iso = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const seed = (d.getDate() * 17 + device.id.charCodeAt(1) * 13 + device.baseWatts) % 100;
+    const wav = Math.sin(i * 0.31 + device.baseWatts * 0.001) * 0.5 + Math.sin(seed * 0.18) * 0.5;
+    const kwhBase = (device.baseWatts / 1000) * (device.status === 'paused' ? 2 : 5 + wav * 2.5);
+    const kwh = Math.max(0.1, Math.round((kwhBase + (seed % 5) * 0.15) * 10) / 10);
+    const runtime = Math.max(0.5, Math.round((kwh / (device.baseWatts / 1000)) * 10) / 10);
+    const cost = Math.round(kwh * tariff);
+    const onHours = device.status === 'paused' ? '—' : `${Math.round(runtime * 10) / 10} h`;
+    logs.push({ iso, label, kwh, runtime, cost, onHours, watts: device.baseWatts });
+  }
+  return logs;
+}
+
+export function daysSince(iso) {
+  const a = new Date(iso);
+  const b = new Date();
+  return Math.max(1, Math.floor((b - a) / (1000 * 60 * 60 * 24)));
 }
