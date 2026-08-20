@@ -8,8 +8,9 @@ export const mockHome = {
   rooms: [
     { id: "r1", name: "Living Room", devices: ["d1", "d2"] },
     { id: "r2", name: "Master Bedroom", devices: ["d3"] },
-    { id: "r3", name: "Kitchen", devices: ["d4", "d5", "d6"] },
+    { id: "r3", name: "Kitchen", devices: ["d4", "d6"] },
     { id: "r4", name: "Guest Room", devices: [] },
+    { id: "r5", name: "Utility", devices: ["d5"] },
   ],
   devices: [
     {
@@ -63,7 +64,7 @@ export const mockHome = {
     {
       id: "d5",
       name: "Washing Machine",
-      room: "Kitchen",
+      room: "Utility",
       baseWatts: 500,
       monthCost: 320,
       todayCost: 0,
@@ -92,7 +93,7 @@ export const FLOORS = [
   { id: 'ground', name: 'Ground Floor', color: '#E11D48', soft: 'rgba(225,29,72,0.14)', rooms: ['Living Room', 'Kitchen'] },
   { id: 'first', name: 'First Floor', color: '#0EA5E9', soft: 'rgba(14,165,233,0.14)', rooms: ['Master Bedroom'] },
   { id: 'second', name: 'Second Floor', color: '#F59E0B', soft: 'rgba(245,158,11,0.14)', rooms: ['Guest Room'] },
-  { id: 'terrace', name: 'Terrace / Utility', color: '#10B981', soft: 'rgba(16,185,129,0.14)', rooms: [] },
+  { id: 'terrace', name: 'Terrace / Utility', color: '#10B981', soft: 'rgba(16,185,129,0.14)', rooms: ['Utility'] },
 ];
 
 export const FLOOR_DAILY_RECORDS = (() => {

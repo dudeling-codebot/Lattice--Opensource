@@ -109,23 +109,23 @@ export default function FloorCircular() {
             })}
           </svg>
 
-          {/* Center data */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center" style={{ pointerEvents: focal ? 'auto' : 'none' }}>
+          {/* Center data — high-contrast widget */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center" style={{ pointerEvents: focal ? 'auto' : 'none' }}>
             {focal ? (
-              <button onClick={() => setSelectedFloor(null)} className="flex flex-col items-center">
-                <span className="w-2.5 h-2.5 rounded-full mb-1.5" style={{ background: focal.color }} />
-                <p className="text-[11px] font-bold text-faint uppercase tracking-widest leading-none">{focal.name}</p>
-                <p className="text-[28px] font-extrabold leading-none mt-1 tracking-tight">{focalData.kwh}<span className="text-[12px] font-bold text-muted"> kWh</span></p>
-                <p className="text-[11px] font-mono text-muted mt-1">₹{focalData.cost} · {focalPct}% of day</p>
-                <p className="text-[10px] text-faint mt-1">{selectedDay.label}, {selectedDay.dateLabel}</p>
-                <p className="text-[10px] font-bold mt-2" style={{ color: focal.color }}>Tap to see total ↺</p>
+              <button onClick={() => setSelectedFloor(null)} className="flex flex-col items-center rounded-2xl px-5 py-4 shadow-xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border-strong)', minWidth: 132 }}>
+                <span className="w-3 h-3 rounded-full mb-2 ring-2" style={{ background: focal.color, boxShadow: `0 0 0 3px ${focal.soft}` }} />
+                <p className="text-[12px] font-extrabold tracking-widest uppercase" style={{ color: 'var(--text)' }}>{focal.name}</p>
+                <p className="text-[34px] font-black leading-none mt-1 tracking-tight" style={{ color: focal.color }}>{focalData.kwh}<span className="text-[11px] font-bold ml-1" style={{ color: 'var(--text-muted)' }}>kWh</span></p>
+                <p className="text-[12px] font-mono font-bold mt-1 px-2 py-1 rounded-full" style={{ background: focal.soft, color: focal.color }}>₹{focalData.cost} · {focalPct}% of day</p>
+                <p className="text-[11px] font-semibold text-faint mt-2">{selectedDay.label} · {selectedDay.dateLabel}</p>
               </button>
             ) : (
-              <div className="flex flex-col items-center">
-                <p className="text-[11px] font-bold text-faint uppercase tracking-widest leading-none">Total · {selectedDay.label}</p>
-                <p className="text-[30px] font-extrabold leading-none mt-1 tracking-tight">{total}<span className="text-[12px] font-bold text-muted"> kWh</span></p>
-                <p className="text-[12px] font-mono font-bold mt-1" style={{ color: 'var(--accent)' }}>₹{selectedDay.totalCost}</p>
-                <p className="text-[10px] text-faint mt-1">{selectedDay.dateLabel} · tap a ring</p>
+              <div className="flex flex-col items-center rounded-2xl px-5 py-4 shadow-xl border" style={{ background: 'var(--surface)', borderColor: 'var(--border-strong)', minWidth: 136 }}>
+                <p className="text-[11px] font-extrabold tracking-[0.14em] uppercase" style={{ color: 'var(--text-muted)' }}>Total · {selectedDay.label}</p>
+                <p className="text-[36px] font-black leading-none mt-1 tracking-tight" style={{ color: 'var(--text)' }}>{total}<span className="text-[11px] font-bold ml-1" style={{ color: 'var(--text-muted)' }}>kWh</span></p>
+                <p className="text-[13px] font-mono font-extrabold mt-1.5 px-2.5 py-1 rounded-full" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>₹{selectedDay.totalCost}</p>
+                <p className="text-[11px] font-semibold mt-2" style={{ color: 'var(--text-faint)' }}>{selectedDay.dateLabel}</p>
+                <p className="text-[10px] font-bold mt-1 tracking-wide" style={{ color: 'var(--text-faint)' }}>Tap a ring for floor detail</p>
               </div>
             )}
           </div>
