@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen, Menu, X, Cable } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
@@ -10,11 +10,11 @@ const navItems = [
   { to: '/insights', label: 'Insights', icon: BarChart3 },
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/logbook', label: 'Logbook', icon: BookOpen },
-  { to: '/solar', label: 'Solar', icon: Sun },
+  { to: '/power-sources', label: 'Power sources', icon: Cable },
 ];
 
 const groups = [
-  { title: 'Overview', items: ['/', '/usage', '/insights', '/logbook', '/solar'] },
+  { title: 'Overview', items: ['/', '/usage', '/insights', '/logbook', '/power-sources'] },
   { title: 'Devices', items: ['/connect', '/devices'] },
   { title: 'Account', items: ['/profile'] },
 ];

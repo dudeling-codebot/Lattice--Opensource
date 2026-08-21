@@ -10,7 +10,7 @@ import DeviceDetail from './pages/DeviceDetail.jsx';
 import Insights from './pages/Insights.jsx';
 import Profile from './pages/Profile.jsx';
 import Logbook from './pages/Logbook.jsx';
-import Solar from './pages/Solar.jsx';
+import PowerSources from './pages/PowerSources.jsx';
 import { EnergyProvider } from './context/EnergyContext.jsx';
 
 export default function App() {
@@ -58,7 +58,8 @@ export default function App() {
             <Route path="/insights" element={<Insights />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/logbook" element={<Logbook />} />
-            <Route path="/solar" element={<Solar />} />
+            <Route path="/power-sources" element={<PowerSources />} />
+            <Route path="/solar" element={<Navigate to="/power-sources" replace />} />
           </Route>
           <Route path="*" element={<Navigate to={started ? '/' : '/welcome'} replace />} />
         </Routes>
