@@ -1,6 +1,6 @@
 import { useOutletContext, Link } from 'react-router-dom';
-import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles, X, SlidersHorizontal, Activity, LayoutGrid } from 'lucide-react';
-import { useState } from 'react';
+import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles, X, SlidersHorizontal, Activity, LayoutGrid, GripVertical, RotateCcw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
 import FloorCircular from '../components/FloorCircular.jsx';
@@ -15,6 +15,34 @@ export default function Dashboard() {
   const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, setRoomState, addDevice, totalWatts, totalToday, totalMonth } = useEnergy();
   const [pendingRoom, setPendingRoom] = useState(null);
   const [widgetDrawer, setWidgetDrawer] = useState(null);
+  const defaultOrder = ['spend','insights','quick','floors','usage','devices','rooms','hogs','alerts','env','report','breakdown'];
+  const [widgetOrder, setWidgetOrder] = useState(() => {
+    try {
+      const saved = localStorage.getItem('lattice-widget-order');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === defaultOrder.length && defaultOrder.every(id=>parsed.includes(id))) return parsed;
+      }
+    } catch {}
+    return defaultOrder;
+  });
+  const [dragId, setDragId] = useState(null);
+  useEffect(()=>{ localStorage.setItem('lattice-widget-order', JSON.stringify(widgetOrder)); },[widgetOrder]);
+  const onDragStart = (e, id) => { setDragId(id); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', id); };
+  const onDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect='move'; };
+  const onDrop = (e, targetId) => {
+    e.preventDefault();
+    const from = dragId || e.dataTransfer.getData('text/plain');
+    if (!from || from===targetId) return;
+    setWidgetOrder(prev=>{
+      const a=[...prev];
+      const fi=a.indexOf(from), ti=a.indexOf(targetId);
+      if (fi===-1||ti===-1) return prev;
+      a.splice(fi,1); a.splice(ti,0,from);
+      return a;
+    });
+    setDragId(null);
+  };
 
   const requestToggleRoom = (roomName) => {
     const dvs = devices.filter(d => d.room === roomName);
@@ -67,13 +95,14 @@ export default function Dashboard() {
   );
 
   const Widget = ({ id, label, title, icon: Icon, children, pullout }) => (
-    <div className="card relative overflow-hidden flex flex-col min-h-[220px]">
+    <div className="card relative overflow-hidden flex flex-col min-h-[220px] group/widget">
       <div className="flex items-center justify-between px-5 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div className="flex items-center gap-2">
-          {Icon && <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-2)' }}><Icon className="w-3.5 h-3.5 text-muted" /></span>}
+          <span className="cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-[var(--surface-2)]" draggable onDragStart={e=>onDragStart(e,id)} title="Drag to reorder"><GripVertical className="w-4 h-4" style={{ color: 'var(--text-faint)' }} /></span>
+          {Icon && <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--surface-2)' }}><Icon className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} /></span>}
           <div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-faint leading-none">{label}</p>
-            <p className="text-[13px] font-extrabold leading-none mt-1">{title}</p>
+            <p className="text-[10px] font-bold tracking-widest uppercase leading-none" style={{ color: 'var(--text-faint)' }}>{label}</p>
+            <p className="text-[13px] font-extrabold leading-none mt-1" style={{ color: 'var(--text)' }}>{title}</p>
           </div>
         </div>
         {pullout && (
@@ -99,6 +128,17 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+    </div>
+  );
+
+  const DragWrap = ({ id, span, children }) => (
+    <div
+      onDragOver={onDragOver}
+      onDrop={e=>onDrop(e, id)}
+      onDragEnter={e=>e.preventDefault()}
+      className={`${span || ''} ${dragId===id ? 'opacity-40' : ''} transition-opacity`}
+    >
+      {children}
     </div>
   );
 

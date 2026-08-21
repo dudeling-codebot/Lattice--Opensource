@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Calendar, Clock, Zap, IndianRupee, Download, Search, ChevronDown, Layers, Home, Building2, Cpu, X, SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { BookOpen, Calendar, Clock, Zap, IndianRupee, Download, Search, ChevronDown, Layers, Home, Building2, Cpu, X, SlidersHorizontal, ChevronRight, GripVertical, RotateCcw } from 'lucide-react';
 import { mockHome, FLOORS, getLogbook, daysSince, energyStatus } from '../data/mockData.js';
 import { useEnergy } from '../context/EnergyContext.jsx';
 
@@ -28,6 +28,8 @@ export default function Logbook() {
   const [sortDesc, setSortDesc] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
   const [detail, setDetail] = useState(null); // {type, id} floor id | room name | device id
+  const [floorOrder, setFloorOrder] = useState(()=>{ try{ const s=localStorage.getItem('lattice-floor-order'); if(s){const p=JSON.parse(s); if(Array.isArray(p)&&p.length===FLOORS.length) return p;}}catch{} return FLOORS.map(f=>f.id); });
+  const [dragFloor, setDragFloor] = useState(null);
 
   // helper to get logs for a scope
   const logsForFloor = (floorId) => {
@@ -81,6 +83,10 @@ export default function Logbook() {
     if(detail.type==='device') return logsForDevice(detail.id);
     return null;
   },[detail, devices, sortDesc]);
+
+  useEffect(()=>{ localStorage.setItem('lattice-floor-order', JSON.stringify(floorOrder)); },[floorOrder]);
+  const onFloorDragStart = (e,id)=>{ setDragFloor(id); e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', id); };
+  const onFloorDrop = (e,targetId)=>{ e.preventDefault(); const from=dragFloor||e.dataTransfer.getData('text/plain'); if(!from||from===targetId) return; setFloorOrder(prev=>{ const a=[...prev]; const fi=a.indexOf(from), ti=a.indexOf(targetId); if(fi===-1||ti===-1) return prev; a.splice(fi,1); a.splice(ti,0,from); return a; }); setDragFloor(null); };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -150,31 +156,37 @@ export default function Logbook() {
         <p className="text-[11px] text-faint mt-2">🟢 Low &lt;6 kWh · 🟡 Normal 6–10 kWh · 🔴 High &gt;10 kWh — varied across rows as requested.</p>
       </div>
 
-      {/* Grouped widgets — each occupies card, pullout per group */}
+      {/* Grouped widgets — each occupies card, pullout per group — movable */}
       {groupBy === 'floor' && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          {FLOORS.map(floor=>{
-            const { devs, logs } = logsForFloor(floor.id);
-            const kwh14 = (()=>{ const all=[]; devs.forEach(d=> getLogbook(d,14).forEach(l=>all.push(l.kwh))); // avg per day sum?
-              // sum per day across devices in floor
-              const byDate=new Map();
-              devs.forEach(d=> getLogbook(d,14).forEach(l=>{ byDate.set(l.iso, (byDate.get(l.iso)||0)+l.kwh)}));
-              return Array.from(byDate.values());
-            })();
-            const totalKwh = logs.reduce((s,l)=>s+l.kwh,0);
-            const filteredCount = filteredDevices.filter(d=> floor.rooms.includes(d.room)).length;
-            return (
-              <div key={floor.id} className="card p-4 flex flex-col relative overflow-hidden">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{background:floor.color}}/>
-                    <div>
-                      <p className="text-[14px] font-extrabold">{floor.name}</p>
-                      <p className="text-[11px] text-faint">{floor.rooms.join(' · ') || 'No rooms'} · {devs.length} devices</p>
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] flex items-center gap-1" style={{color:'var(--text-faint)'}}><GripVertical className="w-3 h-3"/> Drag floors to reorder — light/dark aware</p>
+            <button onClick={()=>setFloorOrder(FLOORS.map(f=>f.id))} className="btn btn-ghost !px-2 !py-1 !text-[11px]"><RotateCcw className="w-3 h-3"/> Reset floors</button>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            {floorOrder.map(fid=>{
+              const floor=FLOORS.find(f=>f.id===fid);
+              const { devs, logs } = logsForFloor(floor.id);
+              const kwh14 = (()=>{
+                const byDate=new Map();
+                devs.forEach(d=> getLogbook(d,14).forEach(l=>{ byDate.set(l.iso, (byDate.get(l.iso)||0)+l.kwh)}));
+                return Array.from(byDate.values());
+              })();
+              const totalKwh = logs.reduce((s,l)=>s+l.kwh,0);
+              const filteredCount = filteredDevices.filter(d=> floor.rooms.includes(d.room)).length;
+              return (
+                <div key={floor.id} draggable onDragStart={e=>onFloorDragStart(e,floor.id)} onDragOver={e=>e.preventDefault()} onDrop={e=>onFloorDrop(e,floor.id)} className={`card p-4 flex flex-col relative overflow-hidden ${dragFloor===floor.id?'opacity-40':''}`} style={{background:'var(--surface)', borderColor:'var(--border)'}}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="cursor-grab p-1 rounded hover:bg-[var(--surface-2)]" title="Drag"><GripVertical className="w-4 h-4" style={{color:'var(--text-faint)'}}/></span>
+                      <span className="w-3 h-3 rounded-full" style={{background:floor.color}}/>
+                      <div>
+                        <p className="text-[14px] font-extrabold" style={{color:'var(--text)'}}>{floor.name}</p>
+                        <p className="text-[11px]" style={{color:'var(--text-faint)'}}>{floor.rooms.join(' · ') || 'No rooms'} · {devs.length} devices</p>
+                      </div>
                     </div>
+                    <button onClick={()=>setDetail({type:'floor', id: floor.id})} className="btn btn-ghost !px-2.5 !py-1.5 !text-[11px]"><Layers className="w-3.5 h-3.5"/> Pullout <ChevronRight className="w-3 h-3"/></button>
                   </div>
-                  <button onClick={()=>setDetail({type:'floor', id: floor.id})} className="btn btn-ghost !px-2.5 !py-1.5 !text-[11px]"><Layers className="w-3.5 h-3.5"/> Pullout <ChevronRight className="w-3 h-3"/></button>
-                </div>
                 <div className="flex items-center gap-1 mt-2">
                   {FLOORS.map(f=>(
                     <span key={f.id} className="w-2.5 h-2.5 rounded-full border" style={{ background: f.color, borderColor: f.id===floor.id ? 'var(--text)' : 'rgba(255,255,255,0.18)', opacity: f.id===floor.id ? 1 : 0.92, transform: f.id===floor.id ? 'scale(1.25)' : 'scale(1)' }} title={f.name} />
@@ -199,9 +211,10 @@ export default function Logbook() {
                 </div>
               </div>
             );
-          })}
-        </div>
-      )}
+           })}
+         </div>
+         </>
+       )}
 
       {groupBy === 'room' && (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

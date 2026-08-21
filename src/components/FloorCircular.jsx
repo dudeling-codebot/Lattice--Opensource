@@ -109,20 +109,20 @@ export default function FloorCircular() {
             })}
           </svg>
 
-          {/* Center — tiny circle so all 4 rings remain visible in diagram */}
+          {/* Center — theme-aware tiny circle so all 4 rings remain visible */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center" style={{ pointerEvents: focal ? 'auto' : 'none' }}>
             {focal ? (
-              <button onClick={() => setSelectedFloor(null)} className="flex flex-col items-center justify-center rounded-full shadow-xl border backdrop-blur-md" style={{ background: 'rgba(29,29,33,0.92)', borderColor: 'var(--border-strong)', width: 96, height: 96 }}>
+              <button onClick={() => setSelectedFloor(null)} className="flex flex-col items-center justify-center rounded-full shadow-xl border backdrop-blur-md" style={{ background: 'var(--surface)', borderColor: 'var(--border-strong)', width: 96, height: 96 }}>
                 <span className="w-2 h-2 rounded-full mb-1 ring-2" style={{ background: focal.color, boxShadow: `0 0 0 3px ${focal.soft}` }} />
                 <p className="text-[8px] font-extrabold tracking-widest uppercase leading-none" style={{ color: 'var(--text)' }}>{focal.name}</p>
                 <p className="text-[20px] font-black leading-none mt-1 tracking-tight" style={{ color: focal.color }}>{focalData.kwh}<span className="text-[8px] font-bold ml-1" style={{ color: 'var(--text-muted)' }}>kWh</span></p>
                 <p className="text-[8px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded-full" style={{ background: focal.soft, color: focal.color }}>₹{focalData.cost}</p>
               </button>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-full shadow-xl border backdrop-blur-md" style={{ background: 'rgba(29,29,33,0.92)', borderColor: 'var(--border-strong)', width: 96, height: 96 }}>
+              <div className="flex flex-col items-center justify-center rounded-full shadow-xl border backdrop-blur-md" style={{ background: 'var(--surface)', borderColor: 'var(--border-strong)', width: 96, height: 96 }}>
                 <div className="flex items-center gap-1 mb-1">
                   {FLOORS.map(f=>(
-                    <span key={f.id} className="w-1.5 h-1.5 rounded-full border" style={{ background: f.color, borderColor: 'rgba(255,255,255,0.22)', opacity: 1 }} title={f.name} />
+                    <span key={f.id} className="w-1.5 h-1.5 rounded-full border" style={{ background: f.color, borderColor: 'var(--border)', opacity: 1 }} title={f.name} />
                   ))}
                 </div>
                 <p className="text-[8px] font-extrabold tracking-[0.14em] uppercase leading-none" style={{ color: 'var(--text-muted)' }}>Total · {selectedDay.label}</p>
