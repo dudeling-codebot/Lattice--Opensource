@@ -29,11 +29,17 @@ export function EnergyProvider({ children }) {
             targetsRef.current[d.id] = d.baseWatts * (0.35 + Math.random() * 0.65);
           }
           const target = targetsRef.current[d.id] ?? 0;
-          const next = d.currentWatts + (target - d.currentWatts) * 0.16;
+          const diff = target - d.currentWatts;
+          // slow drop to 0 when turned off — visible decay over ~3-5s
+          const factor = diff < 0 ? 0.11 : 0.16;
+          let next = d.currentWatts + diff * factor;
+          // when off and very low, nudge to 0 to finish cleanly
+          if (target === 0 && next < 4) next = Math.max(0, next - 0.8);
+          if (target === 0 && next < 1) next = 0;
           return { ...d, currentWatts: Math.max(0, Math.round(next)) };
         })
       );
-    }, 300);
+    }, 280);
     return () => clearInterval(iv);
   }, [paused]);
 
@@ -121,6 +127,17 @@ export function EnergyProvider({ children }) {
     return newDev;
   };
 
+  const setRoomState = (roomName, on) => {
+    setDevices(prev =>
+      prev.map(d => {
+        if (d.room !== roomName) return d;
+        const next = { ...d, status: on ? 'on' : 'off' };
+        targetsRef.current[d.id] = on ? next.baseWatts * (0.55) : 0;
+        return next;
+      })
+    );
+  };
+
   const totalWatts = devices.reduce((s, d) => s + d.currentWatts, 0);
   const totalToday = devices.reduce((s, d) => s + d.todayCost, 0);
   const totalMonth = devices.reduce((s, d) => s + d.monthCost, 0);
@@ -136,6 +153,7 @@ export function EnergyProvider({ children }) {
         setAll,
         nightMode,
         addDevice,
+        setRoomState,
         totalWatts,
         totalToday,
         totalMonth,
