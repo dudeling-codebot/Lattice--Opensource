@@ -10,10 +10,11 @@ const navItems = [
   { to: '/insights', label: 'Insights', icon: BarChart3 },
   { to: '/profile', label: 'Profile', icon: User },
   { to: '/logbook', label: 'Logbook', icon: BookOpen },
+  { to: '/solar', label: 'Solar', icon: Sun },
 ];
 
 const groups = [
-  { title: 'Overview', items: ['/', '/usage', '/insights', '/logbook'] },
+  { title: 'Overview', items: ['/', '/usage', '/insights', '/logbook', '/solar'] },
   { title: 'Devices', items: ['/connect', '/devices'] },
   { title: 'Account', items: ['/profile'] },
 ];

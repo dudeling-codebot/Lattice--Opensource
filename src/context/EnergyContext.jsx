@@ -29,11 +29,17 @@ export function EnergyProvider({ children }) {
             targetsRef.current[d.id] = d.baseWatts * (0.35 + Math.random() * 0.65);
           }
           const target = targetsRef.current[d.id] ?? 0;
-          const next = d.currentWatts + (target - d.currentWatts) * 0.16;
+          const diff = target - d.currentWatts;
+          // slow drop to 0 when turned off — visible decay over ~3-5s
+          const factor = diff < 0 ? 0.11 : 0.16;
+          let next = d.currentWatts + diff * factor;
+          // when off and very low, nudge to 0 to finish cleanly
+          if (target === 0 && next < 4) next = Math.max(0, next - 0.8);
+          if (target === 0 && next < 1) next = 0;
           return { ...d, currentWatts: Math.max(0, Math.round(next)) };
         })
       );
-    }, 300);
+    }, 280);
     return () => clearInterval(iv);
   }, [paused]);
 

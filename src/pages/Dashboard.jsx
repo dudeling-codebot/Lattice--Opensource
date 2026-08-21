@@ -5,21 +5,34 @@ import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
 import FloorCircular from '../components/FloorCircular.jsx';
 import HourlyLineGraph from '../components/HourlyLineGraph.jsx';
+import EnvironmentalImpact from '../components/EnvironmentalImpact.jsx';
+import BigBreakdownBar from '../components/BigBreakdownBar.jsx';
+import TodaysReport from '../components/TodaysReport.jsx';
+import EnergyAlerts from '../components/EnergyAlerts.jsx';
 
 export default function Dashboard() {
   const { pro } = useOutletContext();
-  const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, setRoomState, totalWatts, totalToday, totalMonth } = useEnergy();
+  const { devices, paused, setPaused, toggleDevice, toggleRoom, setAll, nightMode, setRoomState, addDevice, totalWatts, totalToday, totalMonth } = useEnergy();
   const [pendingRoom, setPendingRoom] = useState(null);
   const [widgetDrawer, setWidgetDrawer] = useState(null);
 
   const requestToggleRoom = (roomName) => {
     const dvs = devices.filter(d => d.room === roomName);
+    if (roomName === 'Guest Room' && dvs.length === 0) {
+      addDevice({ name: 'Guest Light', room: 'Guest Room', baseWatts: 60 });
+      return;
+    }
     const anyOn = dvs.some(d => d.status === 'on');
     if (anyOn) {
       const willOff = dvs.filter(d => d.status === 'on');
       setPendingRoom({ name: roomName, devices: willOff });
     } else {
-      toggleRoom(roomName);
+      // for Utility/Guest with paused devices, use setRoomState to force on
+      if (roomName === 'Utility' || roomName === 'Guest Room') {
+        setRoomState(roomName, true);
+      } else {
+        toggleRoom(roomName);
+      }
     }
   };
 
@@ -203,30 +216,27 @@ export default function Dashboard() {
           <Link to="/devices" className="flex items-center gap-1 text-[12px] font-bold mt-3" style={{ color: 'var(--accent)' }}>Manage & identify devices <ChevronRight className="w-3.5 h-3.5" /></Link>
         </Widget>
 
-        {/* 7 — Rooms with ON/OFF for Utility & Guest — ordered */}
-        <Widget id="rooms" label="Spaces" title="07 · Rooms — tap to toggle" icon={Home} pullout={<p className="text-[12px] text-muted">Rooms are grouped under floors. Turning off a room shows ⚠️ warning. Utility & Guest now have explicit ON/OFF.</p>}>
+        {/* 7 — Rooms — same red switch for all, including Utility & Guest */}
+        <Widget id="rooms" label="Spaces" title="07 · Rooms — tap to toggle" icon={Home} pullout={<p className="text-[12px] text-muted">All rooms use the same red toggle. Guest has no devices — switch is reserved. Utility toggles via ON/OFF state.</p>}>
           <div className="grid grid-cols-2 gap-3">
             {mockHome.rooms.map(r => {
               const dvs = devices.filter(d => d.room === r.name);
               const w = dvs.reduce((s, d) => s + d.currentWatts, 0);
               const c = dvs.reduce((s, d) => s + d.monthCost, 0);
               const roomOn = dvs.some(d => d.status === 'on');
-              const isUtilityOrGuest = r.name === 'Utility' || r.name === 'Guest Room';
               return (
                 <div key={r.id} className="rounded-xl p-4 border flex flex-col" style={{ background: 'var(--surface-2)', borderColor: 'var(--border)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="flex items-center gap-2 text-[13px] font-bold truncate"><Home className="w-4 h-4 text-muted" />{r.name}</span>
-                    {dvs.length > 0 && !isUtilityOrGuest && <button onClick={() => requestToggleRoom(r.name)} className={`switch ${roomOn ? 'on' : ''} scale-90`} />}
+                    <button
+                      onClick={() => requestToggleRoom(r.name)}
+                      className={`switch ${roomOn ? 'on' : ''} scale-90`}
+                      title={roomOn ? 'Turn off' : 'Turn on'}
+                    />
                   </div>
                   <p className="text-[11px] font-mono" style={{ color: w > 0 ? 'var(--text)' : 'var(--text-faint)' }}>{w > 0 ? `${w} W` : 'idle'}</p>
                   <p className="text-[11px] text-faint">₹{c.toLocaleString('en-IN')}/mo · {dvs.length} device{dvs.length!==1?'s':''}</p>
-                  {isUtilityOrGuest && (
-                    <div className="flex gap-1.5 mt-3">
-                      <button onClick={() => setRoomState(r.name, true)} className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-extrabold border ${roomOn ? 'text-white' : 'text-muted'}`} style={{ background: roomOn ? 'var(--accent)' : 'var(--surface)', borderColor: roomOn ? 'var(--accent)' : 'var(--border)' }}>ON</button>
-                      <button onClick={() => setRoomState(r.name, false)} className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-extrabold border ${!roomOn ? 'text-white' : 'text-muted'}`} style={{ background: !roomOn ? '#0EA5E9' : 'var(--surface)', borderColor: !roomOn ? '#0EA5E9' : 'var(--border)', opacity: dvs.length===0 ? 0.6 : 1 }}>OFF</button>
-                    </div>
-                  )}
-                  {dvs.length===0 && <p className="text-[10px] text-faint mt-2">No devices — ON/OFF reserved</p>}
+                  {r.name === 'Guest Room' && dvs.length===0 && <p className="text-[10px] text-faint mt-2">Tap switch to add Guest Light</p>}
                 </div>
               );
             })}
@@ -252,6 +262,24 @@ export default function Dashboard() {
             );
           })}
         </Widget>
+
+        {/* 09 — Alerts (spike + long-running) */}
+        <div className="xl:col-span-2">
+          <EnergyAlerts />
+        </div>
+
+        {/* 10 — Today's total + environmental impact */}
+        <Widget id="env" label="Planet" title="09 · Environmental Impact" icon={Sparkles} pullout={<p className="text-[12px] text-muted">CO₂ at 0.82 kg/kWh, trees at 21 kg/year. Renewable share is mock.</p>}>
+          <EnvironmentalImpact />
+        </Widget>
+        <Widget id="report" label="Report" title="10 · Today's Report" icon={Activity} pullout={<p className="text-[12px] text-muted">Daily report auto-rates Low (&lt;6 kWh) / Normal / High and suggests prevention.</p>}>
+          <TodaysReport />
+        </Widget>
+
+        {/* 11 — Big breakdown bar */}
+        <div className="xl:col-span-2">
+          <BigBreakdownBar />
+        </div>
       </div>
 
       {/* Room off warning */}
@@ -275,7 +303,7 @@ export default function Dashboard() {
             <p className="text-[11px] text-faint mb-4 flex items-center gap-1.5">💡 Tip: You can turn them back on individually from Devices.</p>
             <div className="flex justify-end gap-2">
               <button onClick={() => setPendingRoom(null)} className="btn btn-ghost !px-4 !py-2">Cancel</button>
-              <button onClick={() => { toggleRoom(pendingRoom.name); setPendingRoom(null); }} className="btn btn-primary !px-5 !py-2" style={{ background: '#F59E0B', color: '#fff' }}>⚠️ Yes, turn off</button>
+              <button onClick={() => { setRoomState(pendingRoom.name, false); setPendingRoom(null); }} className="btn btn-primary !px-5 !py-2" style={{ background: '#F59E0B', color: '#fff' }}>⚠️ Yes, turn off</button>
             </div>
           </div>
         </div>

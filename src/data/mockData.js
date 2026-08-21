@@ -3,6 +3,8 @@ export const mockHome = {
   tariff: 8.0,
   hubConnected: true,
   hubType: "Home Assistant",
+  solar: true,
+  solarCapacityKw: 3.5,
   lastMonthTotal: 4120,
   yesterdayTotal: 138,
   rooms: [
@@ -223,4 +225,10 @@ export function daysSince(iso) {
   const a = new Date(iso);
   const b = new Date();
   return Math.max(1, Math.floor((b - a) / (1000 * 60 * 60 * 24)));
+}
+
+export function energyStatus(kwh) {
+  if (kwh < 6) return { label: 'Low', color: '#10B981', dot: '🟢', bg: 'rgba(16,185,129,0.14)' };
+  if (kwh < 10) return { label: 'Normal', color: '#F59E0B', dot: '🟡', bg: 'rgba(245,158,11,0.14)' };
+  return { label: 'High', color: '#E11D48', dot: '🔴', bg: 'rgba(225,29,72,0.14)' };
 }
