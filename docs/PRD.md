@@ -32,5 +32,6 @@ YES — uses **Supabase** (free, no credit card required) for user accounts, hom
 
 ## 7. Build Strategy
 - **Web App:** Works on all browsers, desktops, tablets, and phones.
-- **Tech Stack:** React / Next.js / Vite + Tailwind CSS + DaisyUI + Lucide Icons + Supabase + Simulated Home Assistant API / SLM AI engine.
+- **Tech Stack:** React / Vite + Tailwind CSS + Lucide Icons (frontend); **Python for all backend scripts** (Home Assistant bridge, SLM AI identification, cost/usage calculations); Supabase (database) + Simulated Home Assistant API for demo.
+- **Backend language (planned, not in demo):** Python only — no Node/JS backend scripts. Demo remains frontend-only with simulated data.
 - **Publishing:** Vercel (free live URL via `npx vercel`).

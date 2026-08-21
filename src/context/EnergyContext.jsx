@@ -50,15 +50,26 @@ export function EnergyProvider({ children }) {
   };
 
   const toggleRoom = roomName => {
-    const roomDevices = devices.filter(d => d.room === roomName && d.status !== 'paused');
+    const roomDevices = devices.filter(d => d.room === roomName);
     const anyOn = roomDevices.some(d => d.status === 'on');
     setDevices(prev =>
       prev.map(d => {
-        if (d.room !== roomName || d.status === 'paused') return d;
-        const on = !anyOn;
-        const next = { ...d, status: on ? 'on' : 'off' };
-        targetsRef.current[d.id] = on ? next.baseWatts * (0.45 + Math.random() * 0.5) : 0;
-        return next;
+        if (d.room !== roomName) return d;
+        if (anyOn) {
+          if (d.status === 'on') {
+            const next = { ...d, status: 'off' };
+            targetsRef.current[d.id] = 0;
+            return next;
+          }
+          return d;
+        } else {
+          if (d.status === 'off' || d.status === 'paused') {
+            const next = { ...d, status: 'on' };
+            targetsRef.current[d.id] = next.baseWatts * (0.45 + Math.random() * 0.5);
+            return next;
+          }
+          return d;
+        }
       })
     );
   };

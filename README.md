@@ -18,43 +18,89 @@ Built as a collaboration with a school student founder (grade 8–12, no coding 
 
 > Note: live energy values are **simulated** for the demo. Real Home Assistant integration arrives in a later stage.
 
-## Pages
+## Pages (demo app)
 
 | Route | Page |
 | --- | --- |
 | `/welcome` | Brand landing / demo entry |
 | `/` | Live dashboard (flow map, totals, energy hogs, rooms, appliances) |
+| `/usage` | Usage breakdown (month comparison, weekly trend) |
 | `/connect` | Home Assistant connect wizard (3 steps) |
 | `/devices` | Imported devices + AI identification, confirm/correct/edit |
 | `/device/:id` | Appliance detail with 24h curve and cost math |
 | `/insights` | Tariff setting, anonymized-sharing consent, PRO info |
 
+## Customer website — Lattice (marketing site)
+
+A separate public marketing site for **Lattice** (standalone, not the demo) lives in `marketing/` (`marketing/src/App.jsx:1`). Built for individuals + enterprises with pricing. Sections: hero, stats, for individuals, for enterprises, how it works, pricing (Starter Free / Home Pro ₹99 / Family ₹249 + Enterprise), contact form, footer.
+
+Branding: `Lattice` (not `LATTICE`), tagline `Connecting Ideas. Building Solutions.`, deep navy `#0B0F19` + magenta `#E11D48`, Inter font.
+
 ## Tech stack
 
-- **React 18 + Vite** — fast, browser-based web app (works on phones too)
-- **Tailwind CSS** — styling with a Liquid Glass palette (deep slate navy, LATTICE magenta, PRO electric blue)
-- **React Router** — multi-page navigation
+- **React 18 + Vite** — fast, browser-based web apps (demo app at root + marketing site in `marketing/`)
+- **Tailwind CSS** — styling with a Liquid Glass palette (deep slate navy, Lattice magenta, PRO electric blue)
+- **React Router** — multi-page navigation (demo app)
 - **Supabase** (planned) — free database + user accounts (no credit card)
 - **Google Colab** (planned) — the SLM AI engine for appliance identification
-- **Vercel** (planned) — free publishing for a shareable link
+- **Vercel** — free publishing for public URLs (two projects: demo + marketing; see Deploy)
 
 ## Run it locally
 
-Requirements: [Node.js LTS](https://nodejs.org) (free).
+Requirements: [Node.js LTS](https://nodejs.org) (free). Use `npm.cmd` on Windows if `npm` is blocked by execution policy.
+
+### 1. Demo app (root)
 
 ```bash
-npm install     # first time only
-npm run dev     # start the app
+npm install          # first time only (at repo root)
+npm run dev          # Vite dev server
+# open http://localhost:3000
 ```
 
-Then open **http://localhost:3000** in your browser. That's it.
-
-Production build:
+Production build / preview:
 
 ```bash
 npm run build
-npm run preview
+npm run preview -- --host --port 3000
 ```
+
+### 2. Customer website (marketing)
+
+```bash
+cd marketing
+npm install          # first time only
+npm run dev          # http://localhost:5173
+# or
+npm run build
+npm run preview -- --host --port 3000   # currently hosted at http://localhost:3000 and http://localhost:5173
+npm run preview -- --host --port 5173   # alternative port (both verified 200)
+```
+
+Network access: `http://192.168.88.36:3000/` / `http://192.168.88.36:5173/` on the same Wi-Fi.
+
+To stop background preview: `Get-Process vercel,node | Stop-Process` or `Stop-Process -Id <PID>`.
+
+## Deploy (public URL — Vercel)
+
+Two Vercel projects from the same GitHub repo `dudeling-codebot/Lattice--Opensource`:
+
+| Project | Root Directory | Local path | Public URL (after deploy) |
+| --- | --- | --- | --- |
+| `lattice-smart-energy` | `.` (repo root) | `src/App.jsx:1` | `https://lattice-smart-energy.vercel.app` |
+| `lattice-marketing` | `marketing` | `marketing/src/App.jsx:1` | `https://lattice-marketing-gules.vercel.app` (or alias you set) |
+
+Steps (one-time):
+
+1. Vercel signup with the repo-owner email (dudeling-codebot) at https://vercel.com/signup
+2. Install Vercel GitHub App: https://github.com/apps/vercel → `Only select repositories` → `Lattice--Opensource`
+3. `vercel login` (device-code flow) → `vercel whoami` should show the owner account
+4. From repo root: `vercel deploy --prod --yes`  → demo app
+5. From `marketing/`: `vercel deploy --prod --yes` → marketing site
+6. Set marketing root directory: `vercel project update lattice-marketing --root-directory marketing` or Dashboard → Settings → Git → Root Directory
+7. Connect git (auto-deploy on push): `vercel git connect https://github.com/dudeling-codebot/Lattice--Opensource.git` in each project (or Dashboard → Settings → Git → Connect Git Repository)
+8. (Optional) Reclaim clean aliases: `vercel alias set <deployment-url> lattice-smart-energy.vercel.app`
+
+Every `git push` to `main` then auto-deploys both projects.
 
 ## Project structure
 
@@ -64,11 +110,19 @@ docs/                plain-English guides (always up to date)
   database-plan.md   what we store (Supabase) + rules
   design-guidelines.md  colors, fonts, style rules
 src/
-  pages/             one file per screen
+  pages/             one file per screen (demo app)
   components/        shell, cards, flow map, header
   hooks/             live energy simulation
   data/              demo data
-public/              brand assets (lattice-mark.svg)
+public/              brand assets (lattice-mark.svg, brand/logo.png)
+marketing/           customer website (standalone Vite + React + Tailwind)
+  src/
+    App.jsx          assembles Navbar, Hero, Individuals, Enterprise, HowItWorks, Pricing, Contact
+    components/      one file per section + Logo.jsx
+  public/brand/      copied brand assets
+  vite.config.js     base: './', React plugin
+  tailwind.config.js brand colors, Inter, glow
+  index.html         Inter via Google Fonts, meta description
 ```
 
 ## Guides for non-coders
@@ -78,5 +132,6 @@ The whole project is documented in plain English inside [`docs/`](docs/PRD.md) �
 ## Status
 
 - ✅ Stage 1–4: idea, logic, design, plan
-- 🚧 Stage 5: base app built, multi-page flow working (simulated data)
-- ⏳ Remaining: final UI from Google Stitch, Supabase wiring, AI engine (Colab), Vercel publish, real Home Assistant integration
+- ✅ Stage 5: base demo app built, multi-page flow working (simulated data)
+- ✅ Marketing site built in `marketing/` — hero, individuals, enterprises, pricing, contact, responsive, Inter + magenta/navy theme, verified via headless Edge and local preview on :3000/:5173
+- ⏳ Remaining: final UI from Google Stitch, Supabase wiring, AI engine (Colab), Vercel public URLs (projects previously created as `lattice-marketing` / `lattice-smart-energy` under `meserom460-1169s-projects`, now to be recreated under owner account with git auto-deploy), real Home Assistant integration
