@@ -6,6 +6,14 @@ LATTICE is an affordable smart energy monitor for Indian homes. It shows room-by
 
 Built as a collaboration with a school student founder (grade 8–12, no coding background). All technical decisions are made by the builder; this repo contains both the working app and the plain-English project guides.
 
+## Live URLs (for team — use these)
+
+**Customer site (Lattice marketing):** **https://lattice-energy.vercel.app** (also **https://lattice3.vercel.app** — same site, team domain)
+**Demo inside customer site:** **https://lattice-energy.vercel.app/demo/** (also **https://lattice3.vercel.app/demo/**)
+**Standalone demo app:** **https://lattice-smart-energy.vercel.app**
+
+> `lattice.vercel.app` is taken globally, so the team uses `lattice-energy` / `lattice3`. All three URLs are public, `200 OK`, and auto-deploy on every `git push` to `main` (Vercel git connected, `lattice-marketing` Root Directory `marketing`).
+
 ## What it does
 
 - **Live Home Assistant-style dashboard** with a real-time electricity flow map (main meter → rooms → appliances)
@@ -82,12 +90,12 @@ To stop background preview: `Get-Process vercel,node | Stop-Process` or `Stop-Pr
 
 ## Deploy (public URL — Vercel)
 
-Two Vercel projects from the same GitHub repo `dudeling-codebot/Lattice--Opensource`:
+Two Vercel projects from the same GitHub repo `dudeling-codebot/Lattice--Opensource` (team `lattice3`, owner `dudeling`):
 
-| Project | Root Directory | Local path | Public URL (after deploy) |
+| Project | Root Directory | Local path | Public URL (auto-deploys) |
 | --- | --- | --- | --- |
-| `lattice-smart-energy` | `.` (repo root) | `src/App.jsx:1` | `https://lattice-smart-energy.vercel.app` |
-| `lattice-marketing` | `marketing` | `marketing/src/App.jsx:1` | `https://lattice-marketing-gules.vercel.app` (or alias you set) |
+| `lattice-smart-energy` | `.` (repo root) | `src/App.jsx:1` | **https://lattice-smart-energy.vercel.app** |
+| `lattice-marketing` | `marketing` | `marketing/src/App.jsx:1` | **https://lattice-energy.vercel.app** + **https://lattice3.vercel.app** (+ `/demo/` for embedded demo at `marketing/public/demo/`) |
 
 Steps (one-time):
 
@@ -134,4 +142,5 @@ The whole project is documented in plain English inside [`docs/`](docs/PRD.md) �
 - ✅ Stage 1–4: idea, logic, design, plan
 - ✅ Stage 5: base demo app built, multi-page flow working (simulated data)
 - ✅ Marketing site built in `marketing/` — hero, individuals, enterprises, pricing, contact, responsive, Inter + magenta/navy theme, verified via headless Edge and local preview on :3000/:5173
-- ⏳ Remaining: final UI from Google Stitch, Supabase wiring, AI engine (Colab), Vercel public URLs (projects previously created as `lattice-marketing` / `lattice-smart-energy` under `meserom460-1169s-projects`, now to be recreated under owner account with git auto-deploy), real Home Assistant integration
+- ✅ Vercel public URLs live under `lattice3` (owner `dudeling`): `lattice-energy` + `lattice3` for marketing (SSO off, `200 OK`), `lattice-smart-energy` for demo, `.../demo/` embedded via `marketing/public/demo/` (`vite.config.js:6` `base: './'`)
+- ⏳ Remaining: final UI from Google Stitch, Supabase wiring, AI engine (Colab), optional custom `.com` (e.g., `lattice.energy`), real Home Assistant integration
