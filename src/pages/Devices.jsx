@@ -1,12 +1,17 @@
 import { Link } from 'react-router-dom';
-import { Sparkles, CheckCircle2, Search, Pencil, RefreshCw, Cpu, Zap, Snowflake, Tv, Fan, ChevronRight, Plus, X } from 'lucide-react';
+import { Sparkles, CheckCircle2, Search, Pencil, RefreshCw, Cpu, Zap, Snowflake, Tv, Fan, ChevronRight, Plus, X, Lightbulb, Thermometer, Timer } from 'lucide-react';
 import { useState } from 'react';
 import { mockHome } from '../data/mockData.js';
 import { useEnergy } from '../context/EnergyContext.jsx';
 
-const iconFor = name => {
-  const n = name.toLowerCase();
-  if (n.includes('ac') || n.includes('cool')) return Snowflake;
+const iconFor = d => {
+  const n = (d.name || '').toLowerCase();
+  const t = d.type || '';
+  if (t==='light' || n.includes('tubelight') || n.includes('light')) return Lightbulb;
+  if (t==='thermostat' || n.includes('thermostat')) return Thermometer;
+  if (t==='fridge' || n.includes('fridge') || n.includes('refrigerator')) return Snowflake;
+  if (t==='washer' || n.includes('washing')) return Timer;
+  if (t==='ac' || n.includes('ac') || n.includes('cool')) return Snowflake;
   if (n.includes('tv')) return Tv;
   if (n.includes('plug')) return Cpu;
   if (n.includes('cooler')) return Fan;
@@ -83,7 +88,7 @@ export default function Devices() {
             {d.name}
           </Link>
         )}
-        <p className="text-[11px] text-faint">{d.room} · ₹{d.monthCost.toLocaleString('en-IN')}/mo</p>
+        <p className="text-[11px] text-faint">{d.room} · ₹{d.monthCost.toLocaleString('en-IN')}/mo · <span className="font-mono" style={{ color: d.status==='on' ? 'var(--text-muted)' : 'var(--text-faint)' }}>{(()=>{ if(d.type==='ac'||d.type==='thermostat') return `${d.temp??d.targetTemp??24}°C · ${d.status==='on'?'ON':'OFF'}`; if(d.type==='fridge') return `${d.temp??4}°C · ${d.status==='on'?'ON':'OFF'}`; if(d.type==='tv') return `Vol ${d.volume??22} · ${d.status==='on'?'ON':'OFF'}`; if(d.type==='light') return `${d.brightness??80}% · ${d.status==='on'?'ON':'OFF'}`; if(d.type==='cooler') return `Fan ${d.fanSpeed??3} · ${d.status==='on'?'ON':'OFF'}`; if(d.type==='washer') return `${d.cycle||'normal'} · ${d.status==='on'?'ON':'OFF'}`; return d.status; })()}</span></p>
       </div>
 
       <span
@@ -253,7 +258,7 @@ export default function Devices() {
   );
 
   function Icon({ d }) {
-    const I = iconFor(d.name);
+    const I = iconFor(d);
     return <I className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />;
   }
 }

@@ -138,6 +138,10 @@ export function EnergyProvider({ children }) {
     );
   };
 
+  const updateDevice = (id, patch) => {
+    setDevices(prev => prev.map(d => d.id === id ? { ...d, ...patch } : d));
+  };
+
   const totalWatts = devices.reduce((s, d) => s + d.currentWatts, 0);
   const totalToday = devices.reduce((s, d) => s + d.todayCost, 0);
   const totalMonth = devices.reduce((s, d) => s + d.monthCost, 0);
@@ -154,6 +158,7 @@ export function EnergyProvider({ children }) {
         nightMode,
         addDevice,
         setRoomState,
+        updateDevice,
         totalWatts,
         totalToday,
         totalMonth,
