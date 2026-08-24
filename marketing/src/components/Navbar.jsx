@@ -3,11 +3,11 @@ import { useState } from 'react';
 import Logo from './Logo.jsx';
 
 const links = [
-  { label: 'For Individuals', href: '#individuals' },
-  { label: 'For Enterprises', href: '#enterprise' },
-  { label: 'How it works', href: '#how' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'For Individuals', href: '/#individuals' },
+  { label: 'For Enterprises', href: '/#enterprise' },
+  { label: 'How it works', href: '/#how' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {
