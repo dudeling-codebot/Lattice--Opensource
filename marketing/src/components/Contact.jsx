@@ -45,10 +45,10 @@ export default function Contact() {
             </p>
             <div className="mt-9 space-y-4">
               <a
-                href="mailto:hello@lattice.energy"
+                href="mailto:lattice-yfc@gmail.com"
                 className="flex items-center gap-3 text-[15px] text-gray-300 hover:text-white transition-colors"
               >
-                <Mail className="w-4.5 h-4.5 text-brand-light" /> hello@lattice.energy
+                <Mail className="w-4.5 h-4.5 text-brand-light" /> lattice-yfc@gmail.com
               </a>
               <p className="flex items-center gap-3 text-[15px] text-gray-300">
                 <MapPin className="w-4.5 h-4.5 text-brand-light" /> India — serving homes &amp;

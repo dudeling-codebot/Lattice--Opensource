@@ -60,8 +60,8 @@ export default function ContactPage() {
             Whether you’re a homeowner, a business with many sites, or a potential partner — drop your details and we’ll reply within one business day. Your request is saved securely.
           </p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm text-gray-400">
-            <a href="mailto:hello@lattice.energy" className="inline-flex items-center gap-2 hover:text-white">
-              <Mail className="w-4 h-4 text-brand-light" /> hello@lattice.energy
+            <a href="mailto:lattice-yfc@gmail.com" className="inline-flex items-center gap-2 hover:text-white">
+              <Mail className="w-4 h-4 text-brand-light" /> lattice-yfc@gmail.com
             </a>
             <span className="inline-flex items-center gap-2">
               <MapPin className="w-4 h-4 text-brand-light" /> India — nationwide
@@ -187,8 +187,8 @@ export default function ContactPage() {
             </ol>
             <div className="pt-6 border-t border-white/5">
               <p className="text-sm font-semibold text-white">Prefer email?</p>
-              <a href="mailto:hello@lattice.energy" className="mt-2 inline-flex text-sm text-brand-light hover:text-white">
-                hello@lattice.energy →
+              <a href="mailto:lattice-yfc@gmail.com" className="mt-2 inline-flex text-sm text-brand-light hover:text-white">
+                lattice-yfc@gmail.com →
               </a>
             </div>
           </div>
