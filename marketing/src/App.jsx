@@ -7,6 +7,7 @@ import HowItWorks from './components/HowItWorks.jsx';
 import Pricing from './components/Pricing.jsx';
 import Contact from './components/Contact.jsx';
 import ContactPage from './pages/ContactPage.jsx';
+import Embed from './pages/Embed.jsx';
 
 function Home() {
   return (
@@ -31,6 +32,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/embed" element={<Embed />} />
+          <Route path="/pitch" element={<Embed />} />
         </Routes>
       </div>
     </BrowserRouter>
