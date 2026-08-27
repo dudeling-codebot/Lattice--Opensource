@@ -61,6 +61,20 @@ export default function App() {
             <Route path="/power-sources" element={<PowerSources />} />
             <Route path="/solar" element={<Navigate to="/power-sources" replace />} />
           </Route>
+          {/* Embed: standalone logbook (no chrome) */}
+          <Route path="/embed/logbook" element={<div className="min-h-screen p-4" style={{ background: 'var(--bg)' }}><Logbook /></div>} />
+          {/* Embed: whole site with Shell — pitch can iframe the full app */}
+          <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} />}>
+            <Route path="/embed" element={<Dashboard />} />
+            <Route path="/embed/usage" element={<Usage />} />
+            <Route path="/embed/connect" element={<Connect />} />
+            <Route path="/embed/devices" element={<Devices />} />
+            <Route path="/embed/device/:id" element={<DeviceDetail />} />
+            <Route path="/embed/insights" element={<Insights />} />
+            <Route path="/embed/profile" element={<Profile />} />
+            <Route path="/embed/logbook-full" element={<Logbook />} />
+            <Route path="/embed/power-sources" element={<PowerSources />} />
+          </Route>
           <Route path="*" element={<Navigate to={started ? '/' : '/welcome'} replace />} />
         </Routes>
       </EnergyProvider>
