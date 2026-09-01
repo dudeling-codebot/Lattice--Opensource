@@ -1,4 +1,5 @@
 import { Plug, Sparkles, TrendingDown, Check, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const steps = [
   {
@@ -33,18 +34,16 @@ export default function HowItWorks() {
 
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           {steps.map((s, i) => (
-            <div key={s.title} className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+            <motion.div key={s.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }} whileHover={{ y: -4 }} className="relative rounded-2xl border border-white/10 bg-white/[0.03] p-8">
               <span className="absolute top-6 right-7 text-5xl font-black text-white/5">{i + 1}</span>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/15 text-brand-light">
-                <s.icon className="w-6 h-6" />
-              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/15 text-brand-light"><s.icon className="w-6 h-6" /></div>
               <h3 className="mt-6 text-xl font-bold text-white">{s.title}</h3>
               <p className="mt-3 text-[14px] leading-relaxed text-gray-400">{s.text}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-14 rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/15 via-white/[0.04] to-white/[0.02] p-10 md:p-14 text-center">
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mt-14 rounded-3xl border border-brand/30 bg-gradient-to-br from-brand/15 via-white/[0.04] to-white/[0.02] p-10 md:p-14 text-center">
           <h3 className="text-2xl md:text-4xl font-black tracking-tight text-white">
             Ready to see your bill differently?
           </h3>
@@ -52,13 +51,8 @@ export default function HowItWorks() {
             Join individuals and businesses already cutting energy waste with Lattice. Start free —
             no credit card, no hardware to buy for the demo.
           </p>
-          <a
-            href="#pricing"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-7 py-4 text-[15px] font-bold text-white hover:bg-brand-light shadow-glow transition-all"
-          >
-            Choose your plan <ArrowRight className="w-4 h-4" />
-          </a>
-        </div>
+          <a href="#pricing" className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-7 py-4 text-[15px] font-bold text-white hover:bg-brand-light shadow-glow transition-all">Choose your plan <ArrowRight className="w-4 h-4" /></a>
+        </motion.div>
       </div>
     </section>
   );

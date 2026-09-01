@@ -1,4 +1,5 @@
 import { Check, Building2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const plans = [
   {
@@ -65,9 +66,14 @@ export default function Pricing() {
         </div>
 
         <div className="mt-14 grid md:grid-cols-3 gap-5 items-stretch">
-          {plans.map((p) => (
-            <div
+          {plans.map((p, i) => (
+            <motion.div
               key={p.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -6, scale: p.highlight ? 1.02 : 1.01 }}
               className={`relative flex flex-col rounded-3xl border p-8 ${
                 p.highlight
                   ? 'border-brand/60 bg-gradient-to-b from-brand/15 to-white/[0.03] shadow-glow'
@@ -92,17 +98,8 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#contact"
-                className={`mt-8 rounded-full py-3.5 text-center text-[14px] font-bold transition-colors ${
-                  p.highlight
-                    ? 'bg-brand text-white hover:bg-brand-light'
-                    : 'border border-white/15 text-gray-200 hover:border-white/40'
-                }`}
-              >
-                {p.cta}
-              </a>
-            </div>
+              <a href="#contact" className={`mt-8 rounded-full py-3.5 text-center text-[14px] font-bold transition-colors ${p.highlight ? 'bg-brand text-white hover:bg-brand-light' : 'border border-white/15 text-gray-200 hover:border-white/40'}`}>{p.cta}</a>
+            </motion.div>
           ))}
         </div>
 

@@ -1,6 +1,7 @@
 import { useOutletContext, Link } from 'react-router-dom';
 import { Bolt, Zap, Power, ChevronRight, Home, Moon, Play, AlertTriangle, Sparkles, X, SlidersHorizontal, Activity, LayoutGrid, GripVertical, RotateCcw } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEnergy } from '../context/EnergyContext.jsx';
 import { mockHome, dailyProfile, anomalies, potentialSavings } from '../data/mockData.js';
 import FloorCircular from '../components/FloorCircular.jsx';
@@ -101,7 +102,7 @@ export default function Dashboard() {
   );
 
   const Widget = ({ id, label, title, icon: Icon, children, pullout }) => (
-    <div className="card relative overflow-hidden flex flex-col min-h-[220px] group/widget">
+    <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} transition={{ duration: 0.45, ease: 'easeOut' }} whileHover={{ y: -2 }} className="card relative overflow-hidden flex flex-col min-h-[220px] group/widget">
       <div className="flex items-center justify-between px-5 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1">
@@ -137,18 +138,22 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 
   const DragWrap = ({ id, span, children }) => (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
       onDragOver={onDragOver}
       onDrop={e=>onDrop(e, id)}
       onDragEnter={e=>e.preventDefault()}
       className={`${span || ''} ${dragId===id ? 'opacity-40' : ''} transition-opacity`}
     >
       {children}
-    </div>
+    </motion.div>
   );
 
   return (

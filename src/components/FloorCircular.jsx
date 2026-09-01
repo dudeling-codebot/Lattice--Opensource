@@ -173,12 +173,6 @@ export default function FloorCircular() {
                       <span className="text-[11px] font-mono text-faint shrink-0">{pct}% · ₹{d.cost}</span>
                     </span>
                     <span className="text-[11px] text-faint truncate block mt-1">{floor.rooms.length ? floor.rooms.join(' · ') : 'Sensors & utility'}</span>
-                    <span className="flex items-center gap-1 mt-2">
-                      {FLOORS.map(f=>(
-                        <span key={f.id} className="w-2.5 h-2.5 rounded-full border" style={{ background: f.color, borderColor: f.id===floor.id ? 'var(--text)' : 'rgba(255,255,255,0.18)', opacity: f.id===floor.id ? 1 : 0.92, transform: f.id===floor.id ? 'scale(1.25)' : 'scale(1)' }} title={f.name} />
-                      ))}
-                      <span className="text-[10px] font-bold ml-1.5" style={{ color: floor.color }}>● {floor.name} + 3 others</span>
-                    </span>
                   </span>
                 </button>
               );
