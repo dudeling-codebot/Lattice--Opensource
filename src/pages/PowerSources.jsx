@@ -177,7 +177,22 @@ function Sankey() {
 export default function PowerSources() {
   const [tab, setTab] = useState('Electricity');
   return (
-    <div className="max-w-[1400px] mx-auto pb-6">
+    <div className="max-w-[1400px] mx-auto pb-6 relative">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px] p-4">
+        <div className="bg-white rounded-3xl px-10 py-10 md:px-16 md:py-12 shadow-2xl border-[6px] border-amber-400 text-center max-w-2xl w-full mx-4">
+          <p className="text-5xl md:text-7xl font-black tracking-tight text-amber-500 leading-none">🚧</p>
+          <p className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mt-4">WORK IN PROGRESS</p>
+          <p className="text-sm md:text-base font-bold text-gray-500 mt-3 tracking-wider">THIS PAGE IS UNDER CONSTRUCTION</p>
+          <div className="mt-6 h-2 w-full rounded-full overflow-hidden flex">
+            <div className="flex-1 bg-amber-400" />
+            <div className="flex-1 bg-black" />
+            <div className="flex-1 bg-amber-400" />
+            <div className="flex-1 bg-black" />
+            <div className="flex-1 bg-amber-400" />
+            <div className="flex-1 bg-black" />
+          </div>
+        </div>
+      </div>
       <div className="mb-3">
         <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2"><Cable className="w-6 h-6" style={{ color: '#0891B2' }} /> Power sources</h1>
         <p className="text-[13px] text-muted mt-1">Formerly Solar — HA Energy style. Pick a tab below. Electricity is the main view you asked for.</p>
