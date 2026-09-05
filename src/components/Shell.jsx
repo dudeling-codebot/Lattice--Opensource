@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen, Menu, X, Cable } from 'lucide-react';
+import { LayoutDashboard, Plug, Cpu, BarChart3, TrendingUp, Sun, Moon, Crown, User, BookOpen, Menu, X, Cable, FlaskConical } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const navItems = [
@@ -19,7 +19,7 @@ const groups = [
   { title: 'Account', items: ['/profile'] },
 ];
 
-export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowClass }) {
+export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowClass, beta, setBeta }) {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -77,6 +77,32 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
             <div className="flex-1" />
 
             <div className="flex items-center gap-1.5">
+              {/* Switch to BETA toggle — priority on top */}
+              <div
+                className="hidden sm:flex items-center gap-2 rounded-full px-2.5 py-1.5 cursor-pointer select-none"
+                onClick={() => setBeta(b => !b)}
+                title={beta ? 'BETA dashboard is active — click to go back to Stable' : 'Try the new dashboard — click to switch to BETA'}
+                style={{
+                  background: beta ? 'var(--accent)' : 'var(--surface-2)',
+                  border: `1px solid ${beta ? 'var(--accent)' : 'var(--border)'}`,
+                  color: beta ? '#fff' : 'var(--text-muted)',
+                }}
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-black tracking-widest uppercase whitespace-nowrap">
+                  {beta ? 'BETA' : 'Switch to BETA'}
+                </span>
+                <span className={`switch ${beta ? 'on' : ''} !w-[32px] !h-[18px] ${beta ? '!bg-white/30 !border-white/40' : ''}`} style={beta ? { background: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.4)' } : undefined} aria-hidden>
+                </span>
+              </div>
+              {/* Mobile beta pill (icon only) */}
+              <button
+                onClick={() => setBeta(b => !b)}
+                className={`sm:hidden btn !px-2.5 !py-2 ${beta ? 'bg-rose-500 text-white' : 'btn-ghost'}`}
+                title={beta ? 'BETA active' : 'Switch to BETA'}
+              >
+                <FlaskConical className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
                 className="btn-ghost btn !px-2.5 !py-2"
@@ -160,7 +186,13 @@ export default function Shell({ pro, setPro, theme, setTheme, activeColor, glowC
       </aside>
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pt-20 pb-12">
-        <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass }} />
+        {beta && (
+          <div className="mb-4 rounded-xl px-4 py-2.5 flex items-center justify-between gap-3 text-xs font-semibold" style={{ background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--accent)' }}>
+            <span className="flex items-center gap-2"><FlaskConical className="w-4 h-4" /> You're viewing the <span className="font-black">BETA</span> dashboard — new PDF-inspired layout.</span>
+            <button onClick={() => setBeta(false)} className="btn btn-ghost !px-3 !py-1 !text-xs shrink-0" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}>Back to Stable</button>
+          </div>
+        )}
+        <Outlet context={{ pro, setPro, theme, setTheme, activeColor, glowClass, beta, setBeta }} />
       </div>
     </div>
   );

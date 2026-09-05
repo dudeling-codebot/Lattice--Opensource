@@ -8,10 +8,20 @@ html {
 
 body {
   @apply bg-ink text-gray-200 antialiased;
-  background-image:
-    radial-gradient(60rem 40rem at 85% -10%, rgba(225, 29, 72, 0.14), transparent 60%),
-    radial-gradient(50rem 35rem at -10% 30%, rgba(225, 29, 72, 0.07), transparent 60%);
-  background-attachment: fixed;
+  /* DotGrid now handles background, keep fallback */
+  background: #0B0F19;
+}
+
+/* Hide native cursor on desktop where custom cursor is active — keep for touch */
+@media (hover: hover) and (pointer: fine) {
+  body.custom-cursor-active {
+    cursor: none;
+  }
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active [role="button"] {
+    cursor: none;
+  }
 }
 
 ::selection {

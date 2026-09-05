@@ -90,7 +90,7 @@ To stop background preview: `Get-Process vercel,node | Stop-Process` or `Stop-Pr
 
 ## Deploy (public URL — Vercel)
 
-Two Vercel projects from the same GitHub repo `dudeling-codebot/Lattice--Opensource` (team `lattice3`, owner `dudeling`):
+Two Vercel projects from the same GitHub repo `seemperer/lattice--opensource` (team `lattice3`, owner `seemperer` — moved from `dudeling-codebot/Lattice--Opensource`; GitHub redirects old URL):
 
 | Project | Root Directory | Local path | Public URL (auto-deploys) |
 | --- | --- | --- | --- |
@@ -99,13 +99,13 @@ Two Vercel projects from the same GitHub repo `dudeling-codebot/Lattice--Opensou
 
 Steps (one-time):
 
-1. Vercel signup with the repo-owner email (dudeling-codebot) at https://vercel.com/signup
-2. Install Vercel GitHub App: https://github.com/apps/vercel → `Only select repositories` → `Lattice--Opensource`
+1. Vercel signup with the repo-owner email (seemperer) at https://vercel.com/signup
+2. Install Vercel GitHub App: https://github.com/apps/vercel → `Only select repositories` → `lattice--opensource`
 3. `vercel login` (device-code flow) → `vercel whoami` should show the owner account
 4. From repo root: `vercel deploy --prod --yes`  → demo app
 5. From `marketing/`: `vercel deploy --prod --yes` → marketing site
 6. Set marketing root directory: `vercel project update lattice-marketing --root-directory marketing` or Dashboard → Settings → Git → Root Directory
-7. Connect git (auto-deploy on push): `vercel git connect https://github.com/dudeling-codebot/Lattice--Opensource.git` in each project (or Dashboard → Settings → Git → Connect Git Repository)
+7. Connect git (auto-deploy on push): `vercel git connect https://github.com/seemperer/lattice--opensource.git` in each project (or Dashboard → Settings → Git → Connect Git Repository) — old `dudeling-codebot/Lattice--Opensource` URL redirects but reconnect to new org for auto-deploy
 8. (Optional) Reclaim clean aliases: `vercel alias set <deployment-url> lattice-smart-energy.vercel.app`
 
 Every `git push` to `main` then auto-deploys both projects.

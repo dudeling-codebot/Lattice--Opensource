@@ -50,7 +50,7 @@ OUTPUT
 ## 2) Full context (if Stitch asks for more)
 
 ### Project overview
-Lattice is an affordable smart energy monitor for Indian homes/businesses. It reads smart meters + Home Assistant devices and shows live electricity use in watts and rupees, per room/appliance/home. The consumer site is **separate from the demo app** (`/` dashboard). Repo: `dudeling-codebot/Lattice--Opensource`, customer site lives in `marketing/` (`marketing/src/App.jsx:1`).
+Lattice is an affordable smart energy monitor for Indian homes/businesses. It reads smart meters + Home Assistant devices and shows live electricity use in watts and rupees, per room/appliance/home. The consumer site is **separate from the demo app** (`/` dashboard). Repo: `seemperer/lattice--opensource` (moved from `dudeling-codebot/Lattice--Opensource`; old URL redirects), customer site lives in `marketing/` (`marketing/src/App.jsx:1`).
 
 ### Tech (for reference, not to constrain design)
 - Vite + React 18 + Tailwind (`marketing/tailwind.config.js:1`, `marketing/vite.config.js:1` base `./`)

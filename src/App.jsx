@@ -16,11 +16,16 @@ import { EnergyProvider } from './context/EnergyContext.jsx';
 export default function App() {
   const [pro, setPro] = useState(() => localStorage.getItem('lattice-pro') === '1');
   const [theme, setTheme] = useState(() => localStorage.getItem('lattice-theme') || 'dark');
+  const [beta, setBeta] = useState(() => localStorage.getItem('lattice-beta') === '1');
   const [started, setStarted] = useState(() => localStorage.getItem('lattice-started') === '1');
 
   useEffect(() => {
     localStorage.setItem('lattice-pro', pro ? '1' : '0');
   }, [pro]);
+
+  useEffect(() => {
+    localStorage.setItem('lattice-beta', beta ? '1' : '0');
+  }, [beta]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -49,7 +54,7 @@ export default function App() {
               )
             }
           />
-          <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} />}>
+          <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} beta={beta} setBeta={setBeta} />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/usage" element={<Usage />} />
             <Route path="/connect" element={<Connect />} />
@@ -64,7 +69,7 @@ export default function App() {
           {/* Embed: standalone logbook (no chrome) */}
           <Route path="/embed/logbook" element={<div className="min-h-screen p-4" style={{ background: 'var(--bg)' }}><Logbook /></div>} />
           {/* Embed: whole site with Shell — pitch can iframe the full app */}
-          <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} />}>
+          <Route element={<Shell pro={pro} setPro={setPro} theme={theme} setTheme={setTheme} activeColor={activeColor} glowClass={glowClass} beta={beta} setBeta={setBeta} />}>
             <Route path="/embed" element={<Dashboard />} />
             <Route path="/embed/usage" element={<Usage />} />
             <Route path="/embed/connect" element={<Connect />} />

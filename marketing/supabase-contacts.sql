@@ -23,3 +23,14 @@ create policy "Allow authenticated reads" on contacts
   for select using (auth.role() = 'authenticated');
 
 -- Optional: allow service_role to do everything (already has bypass)
+
+-- ─────────────────────────────────────────────────────────
+-- Next step: enable email to lattice.yfc@gmail.com on each insert
+-- ─────────────────────────────────────────────────────────
+-- Option A (recommended, easiest): Dashboard → Database → Webhooks
+--   → Table `contacts`, Event `INSERT`, URL `https://<PROJECT>.supabase.co/functions/v1/send-contact-email`
+--   No SQL needed. Just deploy the Edge Function:
+--     supabase functions deploy send-contact-email --no-verify-jwt
+--     supabase secrets set RESEND_API_KEY=re_xxx
+--   See marketing/supabase/functions/send-contact-email/index.ts and marketing/supabase-email-trigger.sql
+--   To use pure SQL triggers (no Dashboard clicks), run marketing/supabase-email-trigger.sql Options B or C.
